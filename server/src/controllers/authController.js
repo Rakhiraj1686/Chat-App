@@ -100,29 +100,49 @@ export const UserLogin = async (req, res, next) => {
 //===================GOOGLEUSERLOGIN===============
 export const GoogleUserLogin = async (req, res, next) => {
   try {
+    const{name,email,id,imageUrl} =req.body;
+
     if (!imageUrl) {
       //use Default Photo code here
       //using placehold.co
     }
-    const existingUser = await User.findOne({ email });
+    let existingUser = await User.findOne({ email });
+    const salt = await bcrypt.genSalt(10)
 
-    if (existingUser) {
+    if (existingUser && existingUser.userType) {
       if (existingUser.userType === "regular") {
         console.log("pink");
+        existingUser.userType = "hybrid";
+        existingUser.googleId = bcrypt.hash(id, salt);
+        await existingUser.save();
       } else {
-        console.log("Green");
+        console.log("green");
+        const isVerified = await bcrypt.compare(id, existingUser.googleId);
+        if (!isVerified) {
+          const error = new Error("User Not Verified");
+          error.statusCode = 400;
+          return next(error);
+        }
       }
     } else {
-      // console.log("orange");
-      const HashGoogleID = bcrypt.hash(id, salt);
+      console.log("orange");
+      const hashGoogleID = await bcrypt.hash(id, salt);
+
       const newUser = await User.create({
         fullName: name,
         email,
-        googleId: HashGoogleID,
+        googleId: hashGoogleID,
         userType: "google",
       });
-
-      res.status(200).json({ message: "Login successful", data: newUser });
+      existingUser = newUser;
     }
-  } catch (error) {}
+
+    //genrate login token if requred
+    res.status(200).json({
+      message: "Login successful",
+      data: existingUser,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
