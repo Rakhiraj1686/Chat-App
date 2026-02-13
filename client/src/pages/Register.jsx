@@ -11,6 +11,7 @@ const Register = () => {
     cfPassword: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [validationError, setValidationError] = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,11 +26,48 @@ const Register = () => {
       password: "",
       cfPassword: "",
     });
+    setValidationError({});
+  };
+
+  const validate = () => {
+    let Error = {};
+
+    if (formData.fullName.length < 3) {
+      Error.fullName = "Name should be more than 3 characters";
+    } else if (!/^[A-Za-z ]+$/.test(formData.fullName)) {
+      Error.fullName = "Only alphabets and spaces allowed";
+    }
+
+    if (
+      !/^[\w\.]+@(gmail|outlook|ricr|yahoo)\.(com|in|co.in)$/.test(
+        formData.email,
+      )
+    ) {
+      Error.email = "Use proper email format";
+    }
+
+    if (!/^[6-9]\d{9}$/.test(formData.mobileNumber)) {
+      Error.mobileNumber = "Only Indian mobile numbers allowed";
+    }
+
+    // ✅ Only password match check
+    if (formData.password !== formData.confirmPassword) {
+      Error.confirmPassword = "Passwords do not match";
+    }
+
+    setValidationError(Error);
+    return Object.keys(Error).length === 0;
   };
 
   const handleRegisterNow = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+
+    if (!validate()) {
+      setIsLoading(false);
+      toast.error("Fill the form correctly");
+      return;
+    }
 
     if (formData.password !== formData.cfPassword) {
       toast.error("Password and Confirm Password do not match");
@@ -40,7 +78,7 @@ const Register = () => {
     try {
       const res = await api.post("/auth/register", formData);
       toast.success(res.data.message);
-      sessionStorage.setItem("ChatKro", JSON.stringify(res.data.data));
+      // sessionStorage.setItem("ChatKro", JSON.stringify(res.data.data));
       handleClearForm();
     } catch (error) {
       console.log(error);
