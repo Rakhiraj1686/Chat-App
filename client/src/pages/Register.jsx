@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import api from "../config/Api";
+import api from "../config/api";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -8,8 +8,9 @@ const Register = () => {
     email: "",
     mobileNumber: "",
     password: "",
-    cfPassword: "",
+    confirmPassword: "",
   });
+
   const [isLoading, setIsLoading] = useState(false);
   const [validationError, setValidationError] = useState({});
 
@@ -20,11 +21,11 @@ const Register = () => {
 
   const handleClearForm = () => {
     setFormData({
+      fullName: "",
       email: "",
-      password: "",
       mobileNumber: "",
       password: "",
-      cfPassword: "",
+      confirmPassword: "",
     });
     setValidationError({});
   };
@@ -40,7 +41,7 @@ const Register = () => {
 
     if (
       !/^[\w\.]+@(gmail|outlook|ricr|yahoo)\.(com|in|co.in)$/.test(
-        formData.email,
+        formData.email
       )
     ) {
       Error.email = "Use proper email format";
@@ -59,7 +60,7 @@ const Register = () => {
     return Object.keys(Error).length === 0;
   };
 
-  const handleRegisterNow = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -69,124 +70,126 @@ const Register = () => {
       return;
     }
 
-    if (formData.password !== formData.cfPassword) {
-      toast.error("Password and Confirm Password do not match");
-      setIsLoading(false);
-      return;
-    }
-
     try {
       const res = await api.post("/auth/register", formData);
       toast.success(res.data.message);
-      // sessionStorage.setItem("ChatKro", JSON.stringify(res.data.data));
       handleClearForm();
     } catch (error) {
       console.log(error);
-      toast.error(error?.response?.data?.message || "Unknown error");
+      toast.error(error?.response?.data?.message || "Registration failed");
     } finally {
       setIsLoading(false);
     }
   };
+
   return (
-    <>
-      <div className="min-h-screen bg-linear-to-br  from-(--color-background)  to-indigo-100 py-6 px-4 ">
-        <div className="max-w-xl mx-auto">
-          {/* From Container  */}
-          <div className="bg-white rounded-xl shadow-2xl overflow-hidden mt-15">
-            <form onSubmit={handleRegisterNow} className="p-8">
-              <div className="mb-5">
-                <div className="text-center mb-10">
-                  <h1 className="text-4xl font-bold text-gray-900">
-                    Register Now
-                  </h1>
-                </div>
-                <div className="space-y-4 ">
-                  <div className="space-y-4">
-                    <input
-                      type="text"
-                      name="fullName"
-                      placeholder="Enter Your Full Name"
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      disabled={isLoading}
-                      required
-                      className="w-full h-fit px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-(--color-text) transition disabled:cursor-not-allowed"
-                    />
-                    <input
-                      type="email"
-                      name="email"
-                      placeholder="Enter Your Email Address"
-                      value={formData.email}
-                      onChange={handleChange}
-                      disabled={isLoading}
-                      required
-                      className="w-full h-fit px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-(--color-text) transition disabled:cursor-not-allowed"
-                    />
-                    <input
-                      type="number"
-                      name="mobileNumber"
-                      placeholder="Enter Your Mobile Number"
-                      value={formData.mobileNumber}
-                      onChange={handleChange}
-                      disabled={isLoading}
-                      required
-                      className="w-full h-fit px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-(--color-text) transition disabled:cursor-not-allowed"
-                    />
-                    <input
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      placeholder="Enter Your Password"
-                      onChange={handleChange}
-                      disabled={isLoading}
-                      required
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-(--color-text) transition disabled:cursor-not-allowed"
-                    />
-                    <input
-                      type="Password"
-                      name="cfPassword"
-                      value={formData.cfPassword}
-                      placeholder="Enter Your Confirm Password"
-                      onChange={handleChange}
-                      disabled={isLoading}
-                      required
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-(--color-text) transition disabled:cursor-not-allowed"
-                    />
-                  </div>
-                  <div className="w-full flex justify-end">
-                    <button
-                      className="text-(--color-primary) hover:text-(--color-secondary) cursor-pointer"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setIsForgetPasswordOpen(true);
-                      }}
-                    >
-                      Forget Password ?
-                    </button>
-                  </div>
-                </div>
+    <div className="min-h-screen flex items-center justify-center bg-base-200 px-4">
+      <div className="w-full max-w-xl">
+        <div className="card bg-base-100 shadow-xl">
+          <div className="card-body">
+            <h2 className="card-title text-3xl justify-center text-primary">
+              Register
+            </h2>
+            <p className="text-center text-base-content/70 mb-6">
+              Hello New User 🫡
+            </p>
 
-                <hr className="border-gray-200 mt-4" />
+            <form
+              onSubmit={handleSubmit}
+              onReset={handleClearForm}
+              className="space-y-4"
+            >
+              <div>
+                <input
+                  type="text"
+                  name="fullName"
+                  placeholder="Full Name"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                  className="input input-bordered w-full"
+                />
+                {validationError.fullName && (
+                  <p className="text-error text-sm">
+                    {validationError.fullName}
+                  </p>
+                )}
+              </div>
 
-                {/* Login Now  */}
-                <div className="flex gap-4 pt-8 border-t-2 border-gray-200">
-                  <button
-                    type="submit"
-                    className="flex-1 bg-linear-to-r bg-(--color secondary)  font-bold py-4 px-6 rounded-lg bg-(--color-secondary) hover:-text-(--color-text)  transition duration-300 transform hover:scale-105 shadow-lg disabled:cursor-not-allowed"
-                  >
-                    {isLoading ? "Laoding.." : "Register Now"}
-                  </button>
-                </div>
+              <input
+                type="email"
+                name="email"
+                placeholder="Email Address"
+                value={formData.email}
+                onChange={handleChange}
+                disabled={isLoading}
+                className="input input-bordered w-full"
+              />
+
+              <input
+                type="tel"
+                name="mobileNumber"
+                placeholder="Mobile Number"
+                maxLength="10"
+                value={formData.mobileNumber}
+                onChange={handleChange}
+                disabled={isLoading}
+                className="input input-bordered w-full"
+              />
+
+              <input
+                type="password"
+                name="password"
+                placeholder="Create Password"
+                value={formData.password}
+                onChange={handleChange}
+                disabled={isLoading}
+                className="input input-bordered w-full"
+              />
+
+              <div>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  placeholder="Confirm Password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                  className="input input-bordered w-full"
+                />
+                {validationError.confirmPassword && (
+                  <p className="text-error text-sm">
+                    {validationError.confirmPassword}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex gap-3 pt-6">
+                <button
+                  type="reset"
+                  disabled={isLoading}
+                  className="btn btn-secondary btn-outline flex-1"
+                >
+                  Clear
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="btn btn-primary flex-1"
+                >
+                  {isLoading ? "Submitting..." : "Register"}
+                </button>
               </div>
             </form>
           </div>
-          {/* Footer Note */}
-          <p className="text-center text-gray-600 mt-8 text-sm">
-            All fields marked are mandatory. We respect your privacy.
-          </p>
         </div>
+
+        <p className="text-center text-sm text-base-content/60 mt-6">
+          We respect your privacy 🔒
+        </p>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -1,39 +1,50 @@
-import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
-import morgan from "morgan";
+import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import authRouter from "./src/routers/authRouter.js";
 import connectDB from "./src/config/db.js";
-// import {v2 as cloudinary} from "cloudinary";
+import AuthRouter from "./src/routers/authRouter.js";
+import morgan from "morgan";
 
 dotenv.config();
 
 const app = express();
 
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+// Middlewares
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
+
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser);
+app.use(cookieParser());
+app.use(morgan("dev"));
 
-app.use("/auth", authRouter);
+// Routes
+app.use("/auth", AuthRouter);
 
+// Health check (optional but recommended)
 app.get("/", (req, res) => {
   res.status(200).json({ message: "API is running 🚀" });
 });
 
+// Global error handler
 app.use((err, req, res, next) => {
-  const ErrorMessage = err.message || "Internal Server Error";
-  const StatusCode = err.statusCode || 500;
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
 
   console.error("❌ Error:", err);
 
-  console.log("Error Found", { ErrorMessage, StatusCode });
-
-  res.status(StatusCode).json({ message: ErrorMessage });
+  res.status(statusCode).json({
+    success: false,
+    message,
+  });
 });
 
-//Start server ONLY after DB connects
+// Start server ONLY after DB connects
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
@@ -49,14 +60,3 @@ const startServer = async () => {
 };
 
 startServer();
-
-// app.listen(port,async () => {
-//   console.log("Server Started at Port : ", port);
-//   connectDB();
-//   try {
-//     const res = await cloudinary.api.ping();
-//     console.log("Cloudinary API is Working:",res);
-//   } catch (error) {
-//     console.error("Error Connecting Cloudinary API :", error)
-//   }
-// });

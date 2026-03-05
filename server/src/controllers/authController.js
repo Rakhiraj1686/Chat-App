@@ -4,64 +4,57 @@ import bcrypt from "bcrypt";
 //=================REGISTER==================
 export const UserRegister = async (req, res, next) => {
   try {
-    //accept data from Fronted
     const { fullName, email, mobileNumber, password } = req.body;
 
-    //Verify that all data exist
     if (!fullName || !email || !mobileNumber || !password) {
       const error = new Error("All fields required");
       error.statusCode = 400;
       return next(error);
     }
 
-    console.log({ fullName, email, mobileNumber, password });
-
-    //check for duplicate user before registration
+    // check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       const error = new Error("Email already exists");
-      error.statusCode = 409;
+      console.log("email already exist")
+      error.statusCode = 400;
       return next(error);
     }
 
-    console.log("Sending Data to DB");
+    
 
-    //encrypt the password
+    // hash password
     const salt = await bcrypt.genSalt(10);
-    const hashPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    console.log("password hashing done, hashPassword = ", hashPassword);
+    console.log("hashed password")
 
-    //save data to database
-    const newUser = await User.create({
+    await User.create({
       fullName,
-      email: email.toLowerCase(),
+      email,
       mobileNumber,
-      password: hashPassword,
+      password: hashedPassword,
+      userType: "regular",
     });
-
-    //send response to frontend
-    console.log(newUser);
-    res.status(201).json({ message: "Registration Successfull" });
+    
+    res.status(201).json({ message: "Registration successful" });
   } catch (error) {
     next(error);
   }
 };
 
+
 //===================LOGIN========================
 export const UserLogin = async (req, res, next) => {
   try {
-    //fetch data from frontend
     const { email, password } = req.body;
 
-    //verify that all data exist
     if (!email || !password) {
       const error = new Error("All fields required");
       error.statusCode = 400;
       return next(error);
     }
 
-    //check for if user is registred or not
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
       const error = new Error("Email not registered");
@@ -69,10 +62,9 @@ export const UserLogin = async (req, res, next) => {
       return next(error);
     }
 
-    //verify password
-    const isVerified = await bcrypt.compare(password, existingUser.password);
-    if (!isVerified) {
-      const error = new Error("Password didn't match");
+    const isGoogleUser = existingUser.userType === "google";
+    if (isGoogleUser) {
+      const error = new Error("Please log in with Google");
       error.statusCode = 400;
       return next(error);
     }
@@ -87,11 +79,11 @@ export const UserLogin = async (req, res, next) => {
       error.statusCode = 400;
       return next(error);
     }
-    //Token Genration will be done here
-    // genToken(existingUser, res);
 
-    //send message to frontend
-    res.status(200).json({ message: "Login Successfull", data: existingUser });
+    res.status(200).json({
+      message: "Login successful",
+      data: existingUser,
+    });
   } catch (error) {
     next(error);
   }
@@ -100,14 +92,14 @@ export const UserLogin = async (req, res, next) => {
 //===================GOOGLEUSERLOGIN===============
 export const GoogleUserLogin = async (req, res, next) => {
   try {
-    const{name,email,id,imageUrl} =req.body;
+    const { name, email, id, imageUrl } = req.body;
 
     if (!imageUrl) {
-      //use Default Photo code here
+      //use Defualt Photo Code here
       //using placehold.co
     }
     let existingUser = await User.findOne({ email });
-    const salt = await bcrypt.genSalt(10)
+    const salt = await bcrypt.genSalt(10);
 
     if (existingUser && existingUser.userType) {
       if (existingUser.userType === "regular") {
