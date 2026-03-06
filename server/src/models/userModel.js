@@ -8,21 +8,26 @@ const userSchema = mongoose.Schema(
     },
     email: {
       type: String,
-      required: true,
       unique: true,
     },
-    mobileNumber: {
+    phone: {
       type: String,
-      required: true,
     },
     password: {
       type: String,
+    },
+    googleId: {
+      type: String,
+    },
+    userType: {
+      type: String,
+      enum: ["regular", "google", "hybrid"],
       required: true,
     },
   },
   { timestamps: true },
 );
 
-const User = mongoose.model("User",userSchema);
+const User = mongoose.model("User", userSchema);
 
 export default User;

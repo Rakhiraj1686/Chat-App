@@ -1,9 +1,8 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 import EmojiPicker from "emoji-picker-react";
 import { GrAttachment } from "react-icons/gr";
 import { BsEmojiSmile } from "react-icons/bs";
 import { IoSend } from "react-icons/io5";
-
 
 const DummyChatData = [
   {
@@ -142,12 +141,9 @@ const ChatWindow = ({ receiver }) => {
   return (
     <div className="p-2 h-full relative">
       <div className="border rounded-lg h-full p-2 flex flex-col">
-
         {/* Header */}
         <div className=" p-3 rounded-lg mb-2">
-          <h2 className="text-lg font-bold text-primary">
-            {receiver.name}
-          </h2>
+          <h2 className="text-lg font-bold text-primary">{receiver.name}</h2>
         </div>
 
         {/* Chat Messages */}
@@ -159,6 +155,16 @@ const ChatWindow = ({ receiver }) => {
                 chat.senderId === 2 ? "chat-receiver" : "chat-sender"
               }`}
             >
+              {/* Avatar */}
+              {/* <div className="relative">
+                <div className="w-11 h-11 rounded-full bg-indigo-500 text-white flex items-center justify-center font-semibold">
+                  {chat.name.charAt(0)}
+                </div>
+
+                Online Dot (optional) 
+                <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-base-200 rounded-full"></span> 
+              </div> */}
+
               <div className="chat-header text-base-content">
                 {chat.senderId === 2 ? receiver.name : "Arpit Gupta"}
               </div>
@@ -177,18 +183,14 @@ const ChatWindow = ({ receiver }) => {
 
         {/* Input Area */}
         <div className="mt-2 flex gap-2 items-center">
-
           {/* Emoji Button */}
-          <button
-            onClick={() => setShowEmoji(!showEmoji)}
-            className="text-xl"
-          >
-            <BsEmojiSmile/>
+          <button onClick={() => setShowEmoji(!showEmoji)} className="text-xl">
+            <BsEmojiSmile />
           </button>
 
           {/* File Upload */}
           <label className="cursor-pointer text-xl">
-            <GrAttachment/>
+            <GrAttachment />
             <input type="file" hidden onChange={handleFile} />
           </label>
 
@@ -203,7 +205,7 @@ const ChatWindow = ({ receiver }) => {
 
           {/* Send Button */}
           <button onClick={sendMessage} className="btn btn-primary">
-           <IoSend/>
+            <IoSend />
           </button>
         </div>
 
@@ -211,7 +213,6 @@ const ChatWindow = ({ receiver }) => {
         <div className="text-center text-sm text-base-content/60 mt-3">
           Powered by <span className="font-bold">DostiHUB</span>
         </div>
-
       </div>
     </div>
   );
