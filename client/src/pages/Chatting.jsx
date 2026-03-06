@@ -1,7 +1,7 @@
 import React , {useState} from 'react'
 import QuickNevigation from "../components/chats/QuickNevigation"
 import ContactBar from "../components/chats/ContactBar"
-import ChatWindow from "../components/chats/chatWindow"
+import ChatWindow from '../components/chats/ChatWindow'
 import ProfilePage from '../components/chats/Profile'
 import Settings from '../components/chats/Settings'
 
