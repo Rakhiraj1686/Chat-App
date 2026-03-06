@@ -142,7 +142,13 @@ const ChatWindow = ({ receiver }) => {
     <div className="p-2 h-full relative">
       <div className="border rounded-lg h-full p-2 flex flex-col">
         {/* Header */}
-        <div className=" p-3 rounded-lg mb-2">
+        <div className="p-3 rounded-lg mb-2 flex items-center gap-3">
+          {/* Avatar */}
+          <div className="w-11 h-11 rounded-full bg-indigo-500 text-white flex items-center justify-center font-semibold">
+            {receiver.name.charAt(0).toUpperCase()}
+          </div>
+
+          {/* Name */}
           <h2 className="text-lg font-bold text-primary">{receiver.name}</h2>
         </div>
 
