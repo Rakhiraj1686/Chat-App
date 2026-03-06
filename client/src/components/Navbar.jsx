@@ -21,7 +21,14 @@ const Navbar = () => {
   return (
     <>
       <div className="bg-primary flex justify-between px-7 py-2">
-        <h1 className="text-2xl font-bold py-2">ChatKro</h1>
+        <div>
+          <h1 className="text-3xl font-bold text-white">
+            Dosti<span className="text-indigo-400">Hub</span>
+          </h1>
+          <p className="text-sm text-gray-500 -mt-1">
+            Connect with friends instantly
+          </p>
+        </div>
         <div className="flex gap-5 text-lg justify-center text-center py-2">
           <Link
             to={"/"}
@@ -47,8 +54,18 @@ const Navbar = () => {
         </div>
 
         <div className="flex gap-3 py-2">
-          <button className="btn btn-secondary" onClick={() => navigate("/login")}>Login</button>
-          <button className="btn btn-secondary" onClick={() => navigate("/register")}>Register</button>
+          <button
+            className="btn btn-secondary"
+            onClick={() => navigate("/login")}
+          >
+            Login
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={() => navigate("/register")}
+          >
+            Register
+          </button>
           <select
             name="theme"
             id="theme"
