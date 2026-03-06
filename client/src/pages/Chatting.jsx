@@ -2,7 +2,6 @@ import React , {useState} from 'react'
 import QuickNevigation from "../components/chats/QuickNevigation"
 import ContactBar from "../components/chats/ContactBar"
 import ChatWindow from '../components/chats/ChatWindow'
-import ProfilePage from '../components/chats/Profile'
 import Settings from '../components/chats/Settings'
 
 const Chatting = () => {
@@ -35,11 +34,6 @@ const Chatting = () => {
               setReceiver={setReceiver}
             />
           )}
-
-          {activePage === "profile" && (
-            <ProfilePage setActivePage={setActivePage}/>
-          )}
-
           {activePage === "settings" && (
             <Settings setActivePage={setActivePage} />
           )}

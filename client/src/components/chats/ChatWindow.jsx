@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import EmojiPicker from "emoji-picker-react";
 import { GrAttachment } from "react-icons/gr";
 import { BsEmojiSmile } from "react-icons/bs";
@@ -107,12 +107,15 @@ const DummyChatData = [
   },
 ];
 
-const ChatWindow = ({ receiver }) => {
-  const [message, setMessage] = useState("");
+const ChatWindow = ({ receiver, setReceiver }) => {
+  const bottomRef = useRef(null);
+
+  const [messages, setMessages] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
+  const [inputMessage, setInputMessage] = useState("");
 
   const handleEmojiClick = (emojiData) => {
-    setMessage((prev) => prev + emojiData.emoji);
+    setMessages((prev) => prev + emojiData.emoji);
   };
 
   const handleFile = (e) => {
@@ -122,11 +125,47 @@ const ChatWindow = ({ receiver }) => {
     }
   };
 
-  const sendMessage = () => {
-    if (!message.trim()) return;
-    console.log("Message:", message);
-    setMessage("");
+  const scrolltoBottom = () => {
+    console.log(bottomRef);
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  //On Every New Message
+  useEffect(() => {
+    scrolltoBottom();
+  }, [messages]);
+
+  const handleKeyDown = (e) => {
+    e.key === "Enter" && handleSend();
+  };
+
+  const handleSend = () => {
+    //call Backend
+
+    const messagePacket = {
+      senderId: 1,
+      receiverId: 2,
+      message: inputMessage,
+    };
+    setMessages((prev) => [...prev, messagePacket]);
+    setInputMessage("");
+  };
+
+  const fetchAllOldMessage = () => {
+    try {
+      setTimeout(() => {
+        setMessages(DummyChatData);
+      }, 5000);
+    } catch (error) {
+      toast.error("Some Error");
+    }
+  };
+
+  //on component Load
+  useEffect(() => {
+    setMessages([]);
+    fetchAllOldMessage();
+  }, [receiver]);
 
   if (!receiver) {
     return (
@@ -154,30 +193,23 @@ const ChatWindow = ({ receiver }) => {
 
         {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto p-2 border rounded-lg bg-accent/30">
-          {DummyChatData.map((chat, idx) => (
+          {messages.map((chat, idx) => (
             <div
               key={idx}
               className={`chat ${
                 chat.senderId === 2 ? "chat-receiver" : "chat-sender"
               }`}
             >
-              {/* Avatar */}
-              {/* <div className="relative">
-                <div className="w-11 h-11 rounded-full bg-indigo-500 text-white flex items-center justify-center font-semibold">
-                  {chat.name.charAt(0)}
-                </div>
-
-                Online Dot (optional) 
-                <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-base-200 rounded-full"></span> 
-              </div> */}
-
               <div className="chat-header text-base-content">
-                {chat.senderId === 2 ? receiver.name : "Arpit Gupta"}
+                {chat.senderId === 2 ? receiver.name : "Rakhi Rani"}
               </div>
 
               <div className="chat-bubble">{chat.message}</div>
             </div>
           ))}
+
+          {/* Dummy div to scroll to bottom  */}
+          <div ref={bottomRef} />
         </div>
 
         {/* Emoji Picker */}
@@ -203,14 +235,15 @@ const ChatWindow = ({ receiver }) => {
           {/* Message Input */}
           <input
             type="text"
+            value={inputMessage}
             placeholder="Type your message..."
             className="input input-bordered w-full"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={(e) => setInputMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
 
           {/* Send Button */}
-          <button onClick={sendMessage} className="btn btn-primary">
+          <button onClick={handleSend} className="btn btn-primary">
             <IoSend />
           </button>
         </div>
