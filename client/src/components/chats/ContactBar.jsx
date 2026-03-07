@@ -8,191 +8,191 @@ import api from "../../config/api";
 
 const DummyRecentContact = [
   {
-    id: 1,
-    name: "Amit Sharma",
+    _id: "rc-1",
+    fullName: "Amit Sharma",
     email: "amit.sharma@example.com",
-    contactNumber: "9876543210",
+    mobileNumber: "9876543210",
   },
   {
-    id: 2,
-    name: "Priya Verma",
+    _id: "rc-2",
+    fullName: "Priya Verma",
     email: "priya.verma@example.com",
-    contactNumber: "9876501234",
+    mobileNumber: "9876501234",
   },
   {
-    id: 3,
-    name: "Rahul Singh",
+    _id: "rc-3",
+    fullName: "Rahul Singh",
     email: "rahul.singh@example.com",
-    contactNumber: "9123456780",
+    mobileNumber: "9123456780",
   },
   {
-    id: 4,
-    name: "Sneha Gupta",
+    _id: "rc-4",
+    fullName: "Sneha Gupta",
     email: "sneha.gupta@example.com",
-    contactNumber: "9988776655",
+    mobileNumber: "9988776655",
   },
   {
-    id: 5,
-    name: "Vikram Patel",
+    _id: "rc-5",
+    fullName: "Vikram Patel",
     email: "vikram.patel@example.com",
-    contactNumber: "9898989898",
+    mobileNumber: "9898989898",
   },
   {
-    id: 6,
-    name: "Neha Joshi",
+    _id: "rc-6",
+    fullName: "Neha Joshi",
     email: "neha.joshi@example.com",
-    contactNumber: "9812345678",
+    mobileNumber: "9812345678",
   },
   {
-    id: 7,
-    name: "Arjun Mehta",
+    _id: "rc-7",
+    fullName: "Arjun Mehta",
     email: "arjun.mehta@example.com",
-    contactNumber: "9001122334",
+    mobileNumber: "9001122334",
   },
   {
-    id: 8,
-    name: "Kavita Nair",
+    _id: "rc-8",
+    fullName: "Kavita Nair",
     email: "kavita.nair@example.com",
-    contactNumber: "9012345678",
+    mobileNumber: "9012345678",
   },
   {
-    id: 9,
-    name: "Rohit Agarwal",
+    _id: "rc-9",
+    fullName: "Rohit Agarwal",
     email: "rohit.agarwal@example.com",
-    contactNumber: "9090909090",
+    mobileNumber: "9090909090",
   },
   {
-    id: 10,
-    name: "Pooja Kapoor",
+    _id: "rc-10",
+    fullName: "Pooja Kapoor",
     email: "pooja.kapoor@example.com",
-    contactNumber: "9887766554",
+    mobileNumber: "9887766554",
   },
 ];
 
 /* ---------------- All Contacts ---------------- */
 
-const DummyAllContact = [
-  {
-    id: 11,
-    name: "Ankit Tiwari",
-    email: "ankit.tiwari@example.com",
-    contactNumber: "9876012345",
-  },
-  {
-    id: 12,
-    name: "Ritika Saxena",
-    email: "ritika.saxena@example.com",
-    contactNumber: "9811122233",
-  },
-  {
-    id: 13,
-    name: "Manish Yadav",
-    email: "manish.yadav@example.com",
-    contactNumber: "9822334455",
-  },
-  {
-    id: 14,
-    name: "Deepak Choudhary",
-    email: "deepak.choudhary@example.com",
-    contactNumber: "9833445566",
-  },
-  {
-    id: 15,
-    name: "Shalini Mishra",
-    email: "shalini.mishra@example.com",
-    contactNumber: "9844556677",
-  },
-  {
-    id: 16,
-    name: "Karan Malhotra",
-    email: "karan.malhotra@example.com",
-    contactNumber: "9855667788",
-  },
-  {
-    id: 17,
-    name: "Nisha Arora",
-    email: "nisha.arora@example.com",
-    contactNumber: "9866778899",
-  },
-  {
-    id: 18,
-    name: "Sandeep Kulkarni",
-    email: "sandeep.kulkarni@example.com",
-    contactNumber: "9877889900",
-  },
-  {
-    id: 19,
-    name: "Pankaj Bansal",
-    email: "pankaj.bansal@example.com",
-    contactNumber: "9888990011",
-  },
-  {
-    id: 20,
-    name: "Aarti Deshmukh",
-    email: "aarti.deshmukh@example.com",
-    contactNumber: "9899001122",
-  },
-  {
-    id: 21,
-    name: "Varun Khanna",
-    email: "varun.khanna@example.com",
-    contactNumber: "9900112233",
-  },
-  {
-    id: 22,
-    name: "Megha Sinha",
-    email: "megha.sinha@example.com",
-    contactNumber: "9911223344",
-  },
-  {
-    id: 23,
-    name: "Tarun Bhatt",
-    email: "tarun.bhatt@example.com",
-    contactNumber: "9922334455",
-  },
-  {
-    id: 24,
-    name: "Komal Jain",
-    email: "komal.jain@example.com",
-    contactNumber: "9933445566",
-  },
-  {
-    id: 25,
-    name: "Rakesh Pawar",
-    email: "rakesh.pawar@example.com",
-    contactNumber: "9944556677",
-  },
-  {
-    id: 26,
-    name: "Divya Nanda",
-    email: "divya.nanda@example.com",
-    contactNumber: "9955667788",
-  },
-  {
-    id: 27,
-    name: "Saurabh Gupta",
-    email: "saurabh.gupta@example.com",
-    contactNumber: "9966778899",
-  },
-  {
-    id: 28,
-    name: "Isha Kapoor",
-    email: "isha.kapoor@example.com",
-    contactNumber: "9977889900",
-  },
-  {
-    id: 29,
-    name: "Aditya Srivastava",
-    email: "aditya.srivastava@example.com",
-    contactNumber: "9988990011",
-  },
-  {
-    id: 30,
-    name: "Ritu Pandey",
-    email: "ritu.pandey@example.com",
-    contactNumber: "9999001122",
-  },
-];
+// const DummyAllContact = [
+//   {
+//     id: 11,
+//     name: "Ankit Tiwari",
+//     email: "ankit.tiwari@example.com",
+//     contactNumber: "9876012345",
+//   },
+//   {
+//     id: 12,
+//     name: "Ritika Saxena",
+//     email: "ritika.saxena@example.com",
+//     contactNumber: "9811122233",
+//   },
+//   {
+//     id: 13,
+//     name: "Manish Yadav",
+//     email: "manish.yadav@example.com",
+//     contactNumber: "9822334455",
+//   },
+//   {
+//     id: 14,
+//     name: "Deepak Choudhary",
+//     email: "deepak.choudhary@example.com",
+//     contactNumber: "9833445566",
+//   },
+//   {
+//     id: 15,
+//     name: "Shalini Mishra",
+//     email: "shalini.mishra@example.com",
+//     contactNumber: "9844556677",
+//   },
+//   {
+//     id: 16,
+//     name: "Karan Malhotra",
+//     email: "karan.malhotra@example.com",
+//     contactNumber: "9855667788",
+//   },
+//   {
+//     id: 17,
+//     name: "Nisha Arora",
+//     email: "nisha.arora@example.com",
+//     contactNumber: "9866778899",
+//   },
+//   {
+//     id: 18,
+//     name: "Sandeep Kulkarni",
+//     email: "sandeep.kulkarni@example.com",
+//     contactNumber: "9877889900",
+//   },
+//   {
+//     id: 19,
+//     name: "Pankaj Bansal",
+//     email: "pankaj.bansal@example.com",
+//     contactNumber: "9888990011",
+//   },
+//   {
+//     id: 20,
+//     name: "Aarti Deshmukh",
+//     email: "aarti.deshmukh@example.com",
+//     contactNumber: "9899001122",
+//   },
+//   {
+//     id: 21,
+//     name: "Varun Khanna",
+//     email: "varun.khanna@example.com",
+//     contactNumber: "9900112233",
+//   },
+//   {
+//     id: 22,
+//     name: "Megha Sinha",
+//     email: "megha.sinha@example.com",
+//     contactNumber: "9911223344",
+//   },
+//   {
+//     id: 23,
+//     name: "Tarun Bhatt",
+//     email: "tarun.bhatt@example.com",
+//     contactNumber: "9922334455",
+//   },
+//   {
+//     id: 24,
+//     name: "Komal Jain",
+//     email: "komal.jain@example.com",
+//     contactNumber: "9933445566",
+//   },
+//   {
+//     id: 25,
+//     name: "Rakesh Pawar",
+//     email: "rakesh.pawar@example.com",
+//     contactNumber: "9944556677",
+//   },
+//   {
+//     id: 26,
+//     name: "Divya Nanda",
+//     email: "divya.nanda@example.com",
+//     contactNumber: "9955667788",
+//   },
+//   {
+//     id: 27,
+//     name: "Saurabh Gupta",
+//     email: "saurabh.gupta@example.com",
+//     contactNumber: "9966778899",
+//   },
+//   {
+//     id: 28,
+//     name: "Isha Kapoor",
+//     email: "isha.kapoor@example.com",
+//     contactNumber: "9977889900",
+//   },
+//   {
+//     id: 29,
+//     name: "Aditya Srivastava",
+//     email: "aditya.srivastava@example.com",
+//     contactNumber: "9988990011",
+//   },
+//   {
+//     id: 30,
+//     name: "Ritu Pandey",
+//     email: "ritu.pandey@example.com",
+//     contactNumber: "9999001122",
+//   },
+// ];
 
 const ContactBar = ({ fetchMode, setReceiver }) => {
   const [contacts, setContacts] = useState([]);
@@ -201,18 +201,27 @@ const ContactBar = ({ fetchMode, setReceiver }) => {
 
   const headerTitle = fetchMode === "RC" ? "Recent Chats" : "All Contacts";
 
+  const normalizeContact = (contact, index = 0) => ({
+    ...contact,
+    _id: contact._id || contact.id || `contact-${index}`,
+    fullName: contact.fullName || contact.name || "Unknown User",
+    mobileNumber: contact.mobileNumber || contact.contactNumber || "",
+  });
+
   const fetchContacts = async () => {
     setLoading(true);
     try {
       if (fetchMode === "RC") {
-        setContacts(DummyRecentContact);
+        setContacts(DummyRecentContact.map((contact, index) => normalizeContact(contact, index)));
       } else if (fetchMode === "AC") {
-        res = await api.get("/user/allUsers");
-        setContacts(res.data.data);
+        const res = await api.get("/user/allUsers");
+        setContacts((res.data.data || []).map((contact, index) => normalizeContact(contact, index)));
+      } else {
+        setContacts([]);
       }
-      setLoading(false);
     } catch (error) {
       toast.error("Failed to load contacts. Please try again.");
+      setContacts([]);
     } finally {
       setLoading(false);
     }
@@ -223,10 +232,10 @@ const ContactBar = ({ fetchMode, setReceiver }) => {
   }, [fetchMode]);
 
   const filteredContacts = contacts.filter((contact) =>
-    contact.name.toLowerCase().includes(search.toLowerCase()),
+    contact.fullName.toLowerCase().includes(search.toLowerCase()),
   );
 
-  if (loading || contacts.length === 0) {
+  if (loading) {
     return (
       <div className="p-2 h-full flex items-center justify-center">
         <span className="text-sm text-primary">Loading contacts...</span>
@@ -234,7 +243,13 @@ const ContactBar = ({ fetchMode, setReceiver }) => {
     );
   }
 
-  console.log(contacts);
+  if (!contacts.length) {
+    return (
+      <div className="p-2 h-full flex items-center justify-center">
+        <span className="text-sm text-primary">No contacts found.</span>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col bg-base-200 border-r">
@@ -264,14 +279,14 @@ const ContactBar = ({ fetchMode, setReceiver }) => {
       <div className="flex-1 overflow-y-auto px-2 space-y-1">
         {filteredContacts.map((contact) => (
           <div
-            key={contact.id}
+            key={contact._id}
             onClick={() => setReceiver(contact)}
             className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-base-300 transition"
           >
             {/* Avatar */}
             <div className="relative">
               <div className="w-11 h-11 rounded-full bg-indigo-500 text-white flex items-center justify-center font-semibold">
-                {contact.name.charAt(0)}
+                {contact.fullName.charAt(0).toUpperCase()}
               </div>
 
               {/* Online Dot (optional) */}
@@ -280,7 +295,7 @@ const ContactBar = ({ fetchMode, setReceiver }) => {
 
             {/* Name */}
             <div className="flex flex-col">
-              <span className="font-medium text-sm">{contact.name}</span>
+              <span className="font-medium text-sm">{contact.fullName}</span>
 
               <span className="text-xs opacity-60">Tap to chat</span>
             </div>

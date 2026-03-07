@@ -4,8 +4,10 @@ import api from "../config/api";
 import { useNavigate } from "react-router-dom";
 import { useGoogleAuth } from "../config/GoogleAuth";
 import { FcGoogle } from "react-icons/fc";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const { isLoading, error, isInitialized, signInWithGoogle } = useGoogleAuth();
@@ -19,6 +21,7 @@ const Login = () => {
       toast.success(res.data.message);
 
       // optional: store user or token
+      setUser(res.data.data);
       sessionStorage.setItem("AppUser", JSON.stringify(res.data.data));
 
       handleClearForm();

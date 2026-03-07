@@ -1,3 +1,4 @@
+import { generateToken } from "../config/authToken.js";
 import User from "../models/userModel.js";
 import bcrypt from "bcrypt";
 
@@ -16,18 +17,13 @@ export const UserRegister = async (req, res, next) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       const error = new Error("Email already exists");
-      console.log("email already exist")
       error.statusCode = 400;
       return next(error);
     }
 
-    
-
     // hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-
-    console.log("hashed password")
 
     await User.create({
       fullName,
@@ -36,12 +32,13 @@ export const UserRegister = async (req, res, next) => {
       password: hashedPassword,
       userType: "regular",
     });
-    
+
     res.status(201).json({ message: "Registration successful" });
   } catch (error) {
     next(error);
   }
 };
+
 
 
 //===================LOGIN========================
@@ -80,6 +77,9 @@ export const UserLogin = async (req, res, next) => {
       return next(error);
     }
 
+    // Generate token and set cookie
+    generateToken(existingUser._id, res);
+    
     res.status(200).json({
       message: "Login successful",
       data: existingUser,
@@ -105,7 +105,7 @@ export const GoogleUserLogin = async (req, res, next) => {
       if (existingUser.userType === "regular") {
         console.log("pink");
         existingUser.userType = "hybrid";
-        existingUser.googleId = bcrypt.hash(id, salt);
+        existingUser.googleId =await bcrypt.hash(id, salt);
         await existingUser.save();
       } else {
         console.log("green");
@@ -130,6 +130,8 @@ export const GoogleUserLogin = async (req, res, next) => {
     }
 
     //genrate login token if requred
+
+    generateToken(existingUser._id, res);
     res.status(200).json({
       message: "Login successful",
       data: existingUser,

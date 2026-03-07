@@ -1,117 +1,121 @@
-import React, { useRef, useState, useEffect } from "react";
-import EmojiPicker from "emoji-picker-react";
-import { GrAttachment } from "react-icons/gr";
-import { BsEmojiSmile } from "react-icons/bs";
-import { IoSend } from "react-icons/io5";
+import React, { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
+import api from "../../config/api";
+import { useAuth } from "../../context/AuthContext";
+import socketAPI from "../../config/WebSocket";
 
-const DummyChatData = [
-  {
-    senderId: 1,
-    receiverId: 2,
-    message: "Hi, how are you?",
-  },
-  {
-    senderId: 2,
-    receiverId: 1,
-    message: "I am good! How about you?",
-  },
-  {
-    senderId: 1,
-    receiverId: 2,
-    message: "Doing well. Are you free today?",
-  },
-  {
-    senderId: 2,
-    receiverId: 1,
-    message: "Yes, mostly in the evening.",
-  },
-  {
-    senderId: 1,
-    receiverId: 2,
-    message: "Great, we should catch up.",
-  },
-  {
-    senderId: 2,
-    receiverId: 1,
-    message: "Sure, what time works for you?",
-  },
-  {
-    senderId: 1,
-    receiverId: 2,
-    message: "Maybe around 6 PM?",
-  },
-  {
-    senderId: 2,
-    receiverId: 1,
-    message: "6 PM sounds good.",
-  },
-  {
-    senderId: 1,
-    receiverId: 2,
-    message: "Let's meet at the cafe near the office.",
-  },
-  {
-    senderId: 2,
-    receiverId: 1,
-    message: "Perfect, I like that place.",
-  },
-  {
-    senderId: 1,
-    receiverId: 2,
-    message: "Did you finish the project work?",
-  },
-  {
-    senderId: 2,
-    receiverId: 1,
-    message: "Almost done, just a few things left.",
-  },
-  {
-    senderId: 1,
-    receiverId: 2,
-    message: "Nice! Let me know if you need help.",
-  },
-  {
-    senderId: 2,
-    receiverId: 1,
-    message: "Thanks, I will.",
-  },
-  {
-    senderId: 1,
-    receiverId: 2,
-    message: "Also, did you check the new tech article I shared?",
-  },
-  {
-    senderId: 2,
-    receiverId: 1,
-    message: "Yes, it was really interesting.",
-  },
-  {
-    senderId: 1,
-    receiverId: 2,
-    message: "The part about real-time apps was great.",
-  },
-  {
-    senderId: 2,
-    receiverId: 1,
-    message: "True, especially the Socket.IO example.",
-  },
-  {
-    senderId: 1,
-    receiverId: 2,
-    message: "Exactly! I want to try building one.",
-  },
-  {
-    senderId: 2,
-    receiverId: 1,
-    message: "Let's discuss it in the evening then.",
-  },
-];
+// const DummyChatData = [
+//   {
+//     senderId: 1,
+//     receiverId: 2,
+//     message: "Hi, how are you?",
+//   },
+//   {
+//     senderId: 2,
+//     receiverId: 1,
+//     message: "I am good! How about you?",
+//   },
+//   {
+//     senderId: 1,
+//     receiverId: 2,
+//     message: "Doing well. Are you free today?",
+//   },
+//   {
+//     senderId: 2,
+//     receiverId: 1,
+//     message: "Yes, mostly in the evening.",
+//   },
+//   {
+//     senderId: 1,
+//     receiverId: 2,
+//     message: "Great, we should catch up.",
+//   },
+//   {
+//     senderId: 2,
+//     receiverId: 1,
+//     message: "Sure, what time works for you?",
+//   },
+//   {
+//     senderId: 1,
+//     receiverId: 2,
+//     message: "Maybe around 6 PM?",
+//   },
+//   {
+//     senderId: 2,
+//     receiverId: 1,
+//     message: "6 PM sounds good.",
+//   },
+//   {
+//     senderId: 1,
+//     receiverId: 2,
+//     message: "Let's meet at the cafe near the office.",
+//   },
+//   {
+//     senderId: 2,
+//     receiverId: 1,
+//     message: "Perfect, I like that place.",
+//   },
+//   {
+//     senderId: 1,
+//     receiverId: 2,
+//     message: "Did you finish the project work?",
+//   },
+//   {
+//     senderId: 2,
+//     receiverId: 1,
+//     message: "Almost done, just a few things left.",
+//   },
+//   {
+//     senderId: 1,
+//     receiverId: 2,
+//     message: "Nice! Let me know if you need help.",
+//   },
+//   {
+//     senderId: 2,
+//     receiverId: 1,
+//     message: "Thanks, I will.",
+//   },
+//   {
+//     senderId: 1,
+//     receiverId: 2,
+//     message: "Also, did you check the new tech article I shared?",
+//   },
+//   {
+//     senderId: 2,
+//     receiverId: 1,
+//     message: "Yes, it was really interesting.",
+//   },
+//   {
+//     senderId: 1,
+//     receiverId: 2,
+//     message: "The part about real-time apps was great.",
+//   },
+//   {
+//     senderId: 2,
+//     receiverId: 1,
+//     message: "True, especially the Socket.IO example.",
+//   },
+//   {
+//     senderId: 1,
+//     receiverId: 2,
+//     message: "Exactly! I want to try building one.",
+//   },
+//   {
+//     senderId: 2,
+//     receiverId: 1,
+//     message: "Let's discuss it in the evening then.",
+//   },
+// ];
 
 const ChatWindow = ({ receiver }) => {
+  const { user } = useAuth();
   const bottomRef = useRef(null);
 
-  const [messages, setMessages] = useState("");
-  const [showEmoji, setShowEmoji] = useState(false);
+  const senderId = user?._id;
+  const receiverId = receiver?._id;
+  const isValidObjectId = (value) => /^[a-f\d]{24}$/i.test(String(value || ""));
+
+  const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
 
   const handleEmojiClick = (emojiData) => {
@@ -139,33 +143,59 @@ const ChatWindow = ({ receiver }) => {
     e.key === "Enter" && handleSend();
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
+    if (!receiverId || !isValidObjectId(receiverId) || !inputMessage.trim()) {
+      return;
+    }
+
     //call Backend
 
     const messagePacket = {
-      senderId: 1,
-      receiverId: 2,
-      message: inputMessage,
+      senderId,
+      receiverId,
+      message: inputMessage.trim(),
     };
-    setMessages((prev) => [...prev, messagePacket]);
-    setInputMessage("");
+
+    const timestamp = new Date().toISOString();
+
+    try {
+      // const res = await api.post(`/user/sendMessage/${receiverId}`, {
+      //   inputMessage,
+      // });
+      //socketAPI.emit("send",messagePacket)
+      setInputMessage("");
+      setMessages((prev) => [
+        ...prev,
+        { ...messagePacket, createdAt: timestamp, updatedAt: timestamp },
+      ]);
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.response?.data?.message || "Message Sending Failed");
+    }
   };
 
-  const fetchAllOldMessage = () => {
+  const fetchAllOldMessage = async () => {
+    if (!receiverId || !isValidObjectId(receiverId)) {
+      setMessages([]);
+      return;
+    }
+
     try {
-      setTimeout(() => {
-        setMessages(DummyChatData);
-      }, 5000);
+      const res = await api.get(`/user/fetchMessages/${receiverId}`);
+      setMessages(res.data.data);
     } catch (error) {
-      toast.error("Some Error");
+      console.log(error);
+      toast.error(error?.response?.data?.message || "Error Fetching Messages");
     }
   };
 
   //on component Load
   useEffect(() => {
     setMessages([]);
-    fetchAllOldMessage();
-  }, [receiver]);
+    if (receiverId) {
+      fetchAllOldMessage();
+    }
+  }, [receiverId]);
 
   if (!receiver) {
     return (
@@ -178,82 +208,64 @@ const ChatWindow = ({ receiver }) => {
   }
 
   return (
-    <div className="p-2 h-full relative">
-      <div className="border rounded-lg h-full p-2 flex flex-col">
-        {/* Header */}
-        <div className="p-3 rounded-lg mb-2 flex items-center gap-3">
-          {/* Avatar */}
-          <div className="w-11 h-11 rounded-full bg-indigo-500 text-white flex items-center justify-center font-semibold">
-            {receiver.name.charAt(0).toUpperCase()}
+    <>
+      <div className="p-2 h-full">
+        <div className="border rounded-lg h-full p-2">
+          <div className="bg-primary p-3 rounded-lg mb-2">
+            <h2 className="text-lg font-bold text-primary-content">
+              {receiver.fullName}
+            </h2>
           </div>
 
-          {/* Name */}
-          <h2 className="text-lg font-bold text-primary">{receiver.name}</h2>
-        </div>
-
-        {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto p-2 border rounded-lg bg-accent/30">
-          {messages.map((chat, idx) => (
-            <div
-              key={idx}
-              className={`chat ${
-                chat.senderId === 2 ? "chat-receiver" : "chat-sender"
-              }`}
-            >
-              <div className="chat-header text-base-content">
-                {chat.senderId === 2 ? receiver.name : "Rakhi Rani"}
+          <div className="h-4/5 overflow-y-auto p-2 border rounded-lg bg-accent/30">
+            {messages.length > 0 ? (
+              messages.map((chat, idx) => (
+                <div
+                  key={idx}
+                  className={`chat ${chat.senderId === receiverId ? "chat-receiver" : "chat-sender"}`}
+                >
+                  <div className="chat-header text-base-content">
+                    {chat.senderId === receiverId
+                      ? receiver.fullName
+                      : user.fullName}
+                  </div>
+                  <div className="chat-bubble">{chat.message}</div>
+                </div>
+              ))
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                {" "}
+                Loading Chats ...
               </div>
+            )}
 
-              <div className="chat-bubble">{chat.message}</div>
-            </div>
-          ))}
-
-          {/* Dummy div to scroll to bottom  */}
-          <div ref={bottomRef} />
-        </div>
-
-        {/* Emoji Picker */}
-        {showEmoji && (
-          <div className="absolute bottom-24 left-5 z-50">
-            <EmojiPicker onEmojiClick={handleEmojiClick} />
+            <div ref={bottomRef} />
           </div>
-        )}
 
-        {/* Input Area */}
-        <div className="mt-2 flex gap-2 items-center">
-          {/* Emoji Button */}
-          <button onClick={() => setShowEmoji(!showEmoji)} className="text-xl">
-            <BsEmojiSmile />
-          </button>
+          <div className="mt-2 flex gap-2">
+            <input
+              type="text"
+              value={inputMessage}
+              placeholder="Type your message..."
+              className="input input-bordered w-full"
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <button
+              className="btn btn-primary disabled:bg-secondary"
+              onClick={handleSend}
+              disabled={inputMessage.trim() === ""}
+            >
+              Send
+            </button>
+          </div>
 
-          {/* File Upload */}
-          <label className="cursor-pointer text-xl">
-            <GrAttachment />
-            <input type="file" hidden onChange={handleFile} />
-          </label>
-
-          {/* Message Input */}
-          <input
-            type="text"
-            value={inputMessage}
-            placeholder="Type your message..."
-            className="input input-bordered w-full"
-            onChange={(e) => setInputMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-
-          {/* Send Button */}
-          <button onClick={handleSend} className="btn btn-primary">
-            <IoSend />
-          </button>
-        </div>
-
-        {/* Footer */}
-        <div className="text-center text-sm text-base-content/60 mt-3">
-          Powered by <span className="font-bold">DostiHUB</span>
+          <div className="text-center text-sm text-base-content/60 mt-1">
+            Powered by <span className="font-bold">ChatAppFSD45</span>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
