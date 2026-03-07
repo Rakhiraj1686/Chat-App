@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import connectDB from "./src/config/db.js";
 import AuthRouter from "./src/routers/authRouter.js";
-import UserRouter from "./src/routers/userRouter.js"
+import UserRouter from "./src/routers/userRouter.js";
 import morgan from "morgan";
 
 dotenv.config();
@@ -26,7 +26,7 @@ app.use(morgan("dev"));
 
 // Routes
 app.use("/auth", AuthRouter);
-app.use("/user",UserRouter)
+app.use("/user", UserRouter);
 
 // Health check (optional but recommended)
 app.get("/", (req, res) => {

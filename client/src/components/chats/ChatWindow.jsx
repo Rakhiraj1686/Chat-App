@@ -115,7 +115,7 @@ const ChatWindow = ({ receiver }) => {
   const [inputMessage, setInputMessage] = useState("");
 
   const handleEmojiClick = (emojiData) => {
-    setMessages((prev) => prev + emojiData.emoji);
+    setInputMessage((prev) => prev + emojiData.emoji);
   };
 
   const handleFile = (e) => {

@@ -1,4 +1,5 @@
 import React from "react";
+import Footer from "../components/Footer";
 
 const contactMethods = [
   {
@@ -141,6 +142,8 @@ const Contact = () => {
           </div>
         </div>
       </section>
+
+      <Footer />
     </main>
   );
 };

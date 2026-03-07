@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import Footer from "../components/Footer";
 
 const quickStats = [
   { value: "99.9%", label: "Message delivery uptime" },
@@ -124,6 +125,8 @@ const Home = () => {
           ))}
         </div>
       </section>
+
+      <Footer />
     </main>
   );
 };

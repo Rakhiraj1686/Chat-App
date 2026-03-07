@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import Footer from "../components/Footer";
 
 const principles = [
   {
@@ -185,6 +186,8 @@ const About = () => {
           </div>
         </div>
       </section>
+
+      <Footer />
     </main>
   );
 };
