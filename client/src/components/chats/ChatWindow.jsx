@@ -107,7 +107,7 @@ const DummyChatData = [
   },
 ];
 
-const ChatWindow = ({ receiver, setReceiver }) => {
+const ChatWindow = ({ receiver }) => {
   const bottomRef = useRef(null);
 
   const [messages, setMessages] = useState("");

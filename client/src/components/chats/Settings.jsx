@@ -31,7 +31,7 @@ const Settings = ({ setActivePage }) => {
         <h2 className="text-xl font-bold">Settings</h2>
       </div>
 
-      <div className="w-40">
+      <div className="w-40 m-4">
         <select
           name="theme"
           id="theme"

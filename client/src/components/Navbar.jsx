@@ -23,7 +23,7 @@ const Navbar = () => {
       <div className="bg-primary flex justify-between px-7 py-2">
         <div>
           <h1 className="text-3xl font-bold text-white">
-            Dosti<span className="text-indigo-400">Hub</span>
+            Dosti<span className="text-indigo-400">HUB</span>
           </h1>
           <p className="text-sm text-gray-500 -mt-1">
             Connect with friends instantly

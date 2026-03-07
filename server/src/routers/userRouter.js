@@ -5,6 +5,6 @@ import { Protect } from "../middlewares/authMiddleware.js";
 const router = express.Router();
 
 // Get all users
-router.get("/allUsers", getAllUsers);
+router.get("/allUsers",Protect, getAllUsers);
 
 export default router;

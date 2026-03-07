@@ -13,7 +13,7 @@ const QuickNavigation = ({ setFetchMode, fetchMode, setActivePage }) => {
       {/* TOP ICONS */}
       <div className="flex flex-col gap-4 items-center">
         <button
-          className="text-2xl"
+          className="text-2xl w-10 h-10 flex items-center justify-center rounded-full hover:bg-base-300 "
           onClick={() => {
             setFetchMode("RC");
             setActivePage("contacts");
@@ -23,7 +23,7 @@ const QuickNavigation = ({ setFetchMode, fetchMode, setActivePage }) => {
         </button>
 
         <button
-          className="text-2xl"
+          className="text-2xl w-10 h-10 flex items-center justify-center rounded-full hover:bg-base-300 "
           onClick={() => {
             setFetchMode("AC");
             setActivePage("contacts");
@@ -37,7 +37,7 @@ const QuickNavigation = ({ setFetchMode, fetchMode, setActivePage }) => {
       <div className="p-2">
         <button
           onClick={() => setActivePage("settings")}
-          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-base-300"
+          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-base-300 hover:animate-spin"
         >
           <IoSettingsOutline size={22} />
         </button>
