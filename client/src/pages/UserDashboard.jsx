@@ -183,7 +183,6 @@ const UserDashboard = () => {
             <div className="mb-4 border-b border-base-300 pb-3">
               <p className="text-primary text-xs font-semibold uppercase tracking-wide">Profile</p>
               <h2 className="text-2xl font-bold text-base-content">Edit Your Details</h2>
-              <p className="text-sm text-base-content/70">WhatsApp-style profile settings, instantly editable.</p>
             </div>
 
             <form onSubmit={handleSaveProfile} onReset={handleResetProfile} className="space-y-4">
