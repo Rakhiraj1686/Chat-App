@@ -2,11 +2,14 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
+import { FaLongArrowAltLeft } from "react-icons/fa";
+import { MdLogout } from "react-icons/md";
 
 const profileHints = [
-  "Ye name aapke contacts ko dikhega.",
-  "About me ko short aur clear rakho.",
-  "Email aur phone account recovery me kaam aayega.",
+  "A complete profile helps your friends recognize you and makes it easier to connect.",
+  "Use a friendly display name that your contacts will recognize.",
+  "Add a short bio to let people know more about you.",
+  "Keep your email and phone number up to date for account recovery and notifications.",
 ];
 
 const getProfileForm = (account) => ({
@@ -20,7 +23,8 @@ const UserDashboard = () => {
   const navigate = useNavigate();
   const { user, setUser, setIsLogin } = useAuth();
 
-  const currentUser = user || JSON.parse(sessionStorage.getItem("AppUser") || "null");
+  const currentUser =
+    user || JSON.parse(sessionStorage.getItem("AppUser") || "null");
   const [profileForm, setProfileForm] = useState(getProfileForm(currentUser));
   const [mobilePanel, setMobilePanel] = useState("summary");
 
@@ -28,10 +32,13 @@ const UserDashboard = () => {
     setProfileForm(getProfileForm(currentUser));
   }, [user]);
 
-  const userName = currentUser?.fullName || currentUser?.name || "DostiHUB User";
+  const userName =
+    currentUser?.fullName || currentUser?.name || "DostiHUB User";
   const userEmail = currentUser?.email || "No email found";
-  const userPhone = currentUser?.mobileNumber || currentUser?.phoneNumber || "Not added yet";
-  const userAbout = currentUser?.about || "Tell people about yourself in a few lines.";
+  const userPhone =
+    currentUser?.mobileNumber || currentUser?.phoneNumber || "Not added yet";
+  const userAbout =
+    currentUser?.about || "Tell people about yourself in a few lines.";
 
   const completedProfileFields = [
     currentUser?.fullName || currentUser?.name,
@@ -67,13 +74,19 @@ const UserDashboard = () => {
   const handleSaveProfile = (event) => {
     event.preventDefault();
 
-    if (profileForm.email && !/^[\w.-]+@[\w.-]+\.[A-Za-z]{2,}$/.test(profileForm.email)) {
+    if (
+      profileForm.email &&
+      !/^[\w.-]+@[\w.-]+\.[A-Za-z]{2,}$/.test(profileForm.email)
+    ) {
       toast.error("Please enter a valid email address.");
       return;
     }
 
-    if (profileForm.mobileNumber && !/^[0-9]{10,15}$/.test(profileForm.mobileNumber)) {
-      toast.error("Phone number should contain 10 to 15 digits.");
+    if (
+      profileForm.mobileNumber &&
+      !/^[0-9]{10,15}$/.test(profileForm.mobileNumber)
+    ) {
+      toast.error("Phone number should contain 10  digits.");
       return;
     }
 
@@ -126,153 +139,194 @@ const UserDashboard = () => {
           <div className="overflow-hidden">
             <div
               className={`flex gap-6 transition-transform duration-300 ease-out lg:grid lg:grid-cols-[320px_1fr] lg:gap-6 ${
-                mobilePanel === "summary" ? "translate-x-0" : "-translate-x-[calc(100%+1.5rem)]"
+                mobilePanel === "summary"
+                  ? "translate-x-0"
+                  : "-translate-x-[calc(100%+1.5rem)]"
               } lg:translate-x-0`}
             >
-          <aside className="min-w-full rounded-2xl border border-base-300 bg-base-200 p-4 lg:min-w-0">
-            <div className="flex flex-col items-center text-center">
-              <div className="avatar avatar-placeholder">
-                <div className="bg-primary text-primary-content h-24 w-24 rounded-full text-3xl font-bold">
-                  <span>{initials || "DU"}</span>
-                </div>
-              </div>
+              <aside className="min-w-full rounded-2xl border border-base-300 bg-base-200 p-4 lg:min-w-0">
+                <div className="flex flex-col items-center text-center">
+                  <div className="avatar avatar-placeholder">
+                    <div className="bg-primary text-primary-content h-24 w-24 rounded-full text-3xl font-bold">
+                      <span>{initials || "DU"}</span>
+                    </div>
+                  </div>
 
-              <h1 className="mt-3 text-2xl font-bold text-base-content">{userName}</h1>
-              <p className="text-sm text-base-content/70">Available</p>
+                  <h1 className="mt-3 text-2xl font-bold text-base-content">
+                    {userName}
+                  </h1>
+                  <p className="text-sm text-base-content/70">Available</p>
 
-              <div className="mt-4 w-full rounded-xl bg-base-100 p-3 text-left">
-                <p className="text-primary text-xs font-semibold uppercase tracking-wide">Profile Strength</p>
-                <p className="mt-1 text-2xl font-bold text-base-content">{profileStrength}%</p>
-                <progress className="progress progress-success mt-2 h-2 w-full" value={profileStrength} max="100" />
-              </div>
-            </div>
-
-            <div className="mt-4 space-y-3">
-              <div className="rounded-xl bg-base-100 p-3">
-                <p className="text-xs uppercase text-base-content/70">Email</p>
-                <p className="text-sm font-medium text-base-content">{userEmail}</p>
-              </div>
-              <div className="rounded-xl bg-base-100 p-3">
-                <p className="text-xs uppercase text-base-content/70">Phone</p>
-                <p className="text-sm font-medium text-base-content">{userPhone}</p>
-              </div>
-              <div className="rounded-xl bg-base-100 p-3">
-                <p className="text-xs uppercase text-base-content/70">About</p>
-                <p className="text-sm font-medium text-base-content">{userAbout}</p>
-              </div>
-            </div>
-
-            <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
-              <Link to="/chatting" className="btn btn-primary">
-                Open Chats
-              </Link>
-              <button
-                type="button"
-                className="btn btn-outline lg:hidden"
-                onClick={() => setMobilePanel("edit")}
-              >
-                Edit Profile
-              </button>
-              <button className="btn btn-outline btn-error" onClick={handleLogout}>
-                Logout
-              </button>
-            </div>
-          </aside>
-
-          <section className="min-w-full rounded-2xl border border-base-300 bg-base-200 p-4 md:p-5 lg:min-w-0">
-            <div className="mb-4 border-b border-base-300 pb-3">
-              <p className="text-primary text-xs font-semibold uppercase tracking-wide">Profile</p>
-              <h2 className="text-2xl font-bold text-base-content">Edit Your Details</h2>
-            </div>
-
-            <form onSubmit={handleSaveProfile} onReset={handleResetProfile} className="space-y-4">
-              <div className="rounded-xl border border-base-300 bg-base-100 p-3">
-                <label className="text-primary mb-1 block text-xs font-semibold uppercase tracking-wide">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  name="fullName"
-                  placeholder="Your display name"
-                  value={profileForm.fullName}
-                  onChange={handleProfileChange}
-                  className="input input-bordered h-11 w-full"
-                />
-              </div>
-
-              <div className="rounded-xl border border-base-300 bg-base-100 p-3">
-                <label className="text-primary mb-1 block text-xs font-semibold uppercase tracking-wide">
-                  About
-                </label>
-                <textarea
-                  name="about"
-                  placeholder="Hey there! I am using DostiHUB"
-                  value={profileForm.about}
-                  onChange={handleProfileChange}
-                  rows={3}
-                  className="textarea textarea-bordered w-full"
-                />
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-xl border border-base-300 bg-base-100 p-3">
-                  <label className="text-primary mb-1 block text-xs font-semibold uppercase tracking-wide">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="name@email.com"
-                    value={profileForm.email}
-                    onChange={handleProfileChange}
-                    className="input input-bordered h-11 w-full"
-                  />
+                  <div className="mt-4 w-full rounded-xl bg-base-100 p-3 text-left">
+                    <p className="text-primary text-xs font-semibold uppercase tracking-wide">
+                      Profile Strength
+                    </p>
+                    <p className="mt-1 text-2xl font-bold text-base-content">
+                      {profileStrength}%
+                    </p>
+                    <progress
+                      className="progress progress-success mt-2 h-2 w-full"
+                      value={profileStrength}
+                      max="100"
+                    />
+                  </div>
                 </div>
 
-                <div className="rounded-xl border border-base-300 bg-base-100 p-3">
-                  <label className="text-primary mb-1 block text-xs font-semibold uppercase tracking-wide">
-                    Phone
-                  </label>
-                  <input
-                    type="tel"
-                    name="mobileNumber"
-                    placeholder="10-15 digit number"
-                    value={profileForm.mobileNumber}
-                    onChange={handleProfileChange}
-                    className="input input-bordered h-11 w-full"
-                  />
+                <div className="mt-4 space-y-3">
+                  <div className="rounded-xl bg-base-100 p-3">
+                    <p className="text-xs uppercase text-base-content/70">
+                      Email
+                    </p>
+                    <p className="text-sm font-medium text-base-content">
+                      {userEmail}
+                    </p>
+                  </div>
+                  <div className="rounded-xl bg-base-100 p-3">
+                    <p className="text-xs uppercase text-base-content/70">
+                      Phone
+                    </p>
+                    <p className="text-sm font-medium text-base-content">
+                      {userPhone}
+                    </p>
+                  </div>
+                  <div className="rounded-xl bg-base-100 p-3">
+                    <p className="text-xs uppercase text-base-content/70">
+                      About
+                    </p>
+                    <p className="text-sm font-medium text-base-content">
+                      {userAbout}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <div className="rounded-xl border border-base-300 bg-base-100 p-3">
-                <p className="text-primary text-xs font-semibold uppercase tracking-wide">Quick Tips</p>
-                <ul className="mt-2 space-y-2 text-sm text-base-content/70">
-                  {profileHints.map((hint) => (
-                    <li key={hint} className="rounded-lg bg-base-200 p-2">
-                      {hint}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+                  <Link to="/chatting" className="btn btn-primary">
+                    <FaLongArrowAltLeft /> Back to Chats
+                  </Link>
+                  <button
+                    type="button"
+                    className="btn btn-outline lg:hidden"
+                    onClick={() => setMobilePanel("edit")}
+                  >
+                    Edit Profile
+                  </button>
+                  <button
+                    className="btn btn-outline btn-error"
+                    onClick={handleLogout}
+                  >
+                    Logout <MdLogout className="ml-1" />
+                  </button>
+                </div>
+              </aside>
 
-              <div className="flex gap-2">
-                <button type="reset" className="btn btn-outline flex-1">
-                  Reset
-                </button>
-                <button type="submit" className="btn btn-primary flex-1">
-                  Save Changes
-                </button>
-              </div>
+              <section className="min-w-full rounded-2xl border border-base-300 bg-base-200 p-4 md:p-5 lg:min-w-0">
+                <div className="mb-4 border-b border-base-300 pb-3">
+                  <p className="text-primary text-xs font-semibold uppercase tracking-wide">
+                    Profile
+                  </p>
+                  <h2 className="text-2xl font-bold text-base-content">
+                    Edit Your Details
+                  </h2>
+                  <p className="text-sm text-base-content/70">
+                    Update your profile information to keep your contacts
+                    informed.
+                  </p>
+                </div>
 
-              <button
-                type="button"
-                className="btn btn-outline mt-2 w-full lg:hidden"
-                onClick={() => setMobilePanel("summary")}
-              >
-                Back to Profile
-              </button>
-            </form>
-          </section>
+                <form
+                  onSubmit={handleSaveProfile}
+                  onReset={handleResetProfile}
+                  className="space-y-4"
+                >
+                  <div className="rounded-xl border border-base-300 bg-base-100 p-3">
+                    <label className="text-primary mb-1 block text-xs font-semibold uppercase tracking-wide">
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      name="fullName"
+                      placeholder="Your display name"
+                      value={profileForm.fullName}
+                      onChange={handleProfileChange}
+                      className="input input-bordered h-11 w-full"
+                    />
+                  </div>
+
+                  <div className="rounded-xl border border-base-300 bg-base-100 p-3">
+                    <label className="text-primary mb-1 block text-xs font-semibold uppercase tracking-wide">
+                      About
+                    </label>
+                    <textarea
+                      name="about"
+                      placeholder="Hey there! I am using DostiHUB"
+                      value={profileForm.about}
+                      onChange={handleProfileChange}
+                      rows={3}
+                      className="textarea textarea-bordered w-full"
+                    />
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="rounded-xl border border-base-300 bg-base-100 p-3">
+                      <label className="text-primary mb-1 block text-xs font-semibold uppercase tracking-wide">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        placeholder="name@email.com"
+                        value={profileForm.email}
+                        onChange={handleProfileChange}
+                        className="input input-bordered h-11 w-full"
+                      />
+                    </div>
+
+                    <div className="rounded-xl border border-base-300 bg-base-100 p-3">
+                      <label className="text-primary mb-1 block text-xs font-semibold uppercase tracking-wide">
+                        Phone
+                      </label>
+                      <input
+                        type="tel"
+                        name="mobileNumber"
+                        placeholder="10 digit number"
+                        value={profileForm.mobileNumber}
+                        onChange={handleProfileChange}
+                        className="input input-bordered h-11 w-full"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-base-300 bg-base-100 p-3">
+                    <p className="text-primary text-xs font-semibold uppercase tracking-wide">
+                      Quick Tips
+                    </p>
+                    <ul className="mt-2 space-y-2 text-sm text-base-content/70">
+                      {profileHints.map((hint) => (
+                        <li key={hint} className="rounded-lg bg-base-200 p-2">
+                          {hint}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button type="reset" className="btn btn-outline flex-1">
+                      Reset
+                    </button>
+                    <button type="submit" className="btn btn-primary flex-1">
+                      Save Changes
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="btn btn-outline mt-2 w-full lg:hidden"
+                    onClick={() => setMobilePanel("summary")}
+                  >
+                    Back to Profile
+                  </button>
+                </form>
+              </section>
             </div>
           </div>
         </div>
