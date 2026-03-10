@@ -8,7 +8,7 @@ import { MdLogout } from "react-icons/md";
 const profileHints = [
   "A complete profile helps your friends recognize you and makes it easier to connect.",
   "Use a friendly display name that your contacts will recognize.",
-  "Add a short bio to let people know more about you.",
+  // "Add a short bio to let people know more about you.",
   "Keep your email and phone number up to date for account recovery and notifications.",
 ];
 
