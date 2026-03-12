@@ -77,7 +77,7 @@ export const fetchMessages = async (req, res, next) => {
     const receiverId = req.params.receiverId;
     const senderId = currentUser._id.toString();
 
-    if (!receiverId || !mongoose.Types.ObjectId.isValid(receiverId)) {
+    if (!mongoose.Types.ObjectId.isValid(receiverId)) {
       const error = new Error("Invalid receiver id");
       error.statusCode = 400;
       return next(error);
@@ -126,7 +126,7 @@ export const sendMessage = async (req, res, next) => {
     const receiverId = req.params.receiverId;
     const senderId = currentUser._id.toString();
 
-    if (!receiverId || !mongoose.Types.ObjectId.isValid(receiverId)) {
+    if (!mongoose.Types.ObjectId.isValid(receiverId)) {
       const error = new Error("Invalid receiver id");
       error.statusCode = 400;
       return next(error);

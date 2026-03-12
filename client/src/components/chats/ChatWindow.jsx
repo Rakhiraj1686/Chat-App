@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import api from "../../config/api";
 import { useAuth } from "../../context/AuthContext";
@@ -8,19 +8,18 @@ const ChatWindow = ({ receiver }) => {
   const { user } = useAuth();
   const bottomRef = useRef(null);
 
-  const senderId = user?._id || 1; // Replace with actual logged-in user ID
-  const receiverId = receiver?._id || 2; // Replace with actual receiver ID
+  const senderId = user?._id;
+  const receiverId = receiver?._id;
 
   const [messages, setMessages] = useState([]);
 
   const [inputMessage, setInputMessage] = useState("");
 
   const scrolltoBottom = () => {
-   // console.log(bottomRef);
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  //On Every New Message
+  // On every new message
   useEffect(() => {
     scrolltoBottom();
   }, [messages]);
@@ -30,8 +29,12 @@ const ChatWindow = ({ receiver }) => {
   };
 
   const handleSend = async () => {
-    //call Backend
+    if (!senderId || !receiverId) {
+      toast.error("Invalid sender/receiver");
+      return;
+    }
 
+    // call backend
     const messagePacket = {
       senderId,
       receiverId,
@@ -56,6 +59,10 @@ const ChatWindow = ({ receiver }) => {
   };
 
   const fetchAllOldMessage = async () => {
+    if (!receiverId) {
+      return;
+    }
+
     try {
       const res = await api.get(`/user/fetchMessages/${receiverId}`);
       setMessages(res.data.data);
@@ -65,12 +72,20 @@ const ChatWindow = ({ receiver }) => {
     }
   };
 
-  const handleReceiveMessage = (newMessagePack) => {
-    // console.log(newMessagePack);
-    setMessages((prev) => [...prev, newMessagePack]);
-  };
+  const handleReceiveMessage = useCallback(
+    (newMessagePack) => {
+      // Only append messages relevant to the currently opened chat.
+      if (
+        newMessagePack.senderId === receiverId ||
+        newMessagePack.receiverId === receiverId
+      ) {
+        setMessages((prev) => [...prev, newMessagePack]);
+      }
+    },
+    [receiverId],
+  );
 
-  //on component Load
+  // on component load
   useEffect(() => {
     setMessages([]);
     if (receiver) {
@@ -84,9 +99,7 @@ const ChatWindow = ({ receiver }) => {
     return () => {
       socketAPI.off("receive", handleReceiveMessage);
     };
-  }, [receiverId, handleReceiveMessage]);
-
-
+  }, [handleReceiveMessage]);
 
   if (!receiver) {
     return (
@@ -97,8 +110,6 @@ const ChatWindow = ({ receiver }) => {
       </div>
     );
   }
-
-  console.log("messages = ", messages);
 
   return (
     <>
@@ -111,7 +122,6 @@ const ChatWindow = ({ receiver }) => {
           </div>
 
           <div className="h-4/5 overflow-y-auto p-2 border rounded-lg bg-accent/30">
-            {/* Chat messages will go here */}
             {messages.length > 0 ? (
               messages.map((chat, idx) => (
                 <div
@@ -128,12 +138,10 @@ const ChatWindow = ({ receiver }) => {
               ))
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                {" "}
                 Loading Chats ...
               </div>
             )}
 
-            {/* Dummy div to scroll to bottom */}
             <div ref={bottomRef} />
           </div>
 
