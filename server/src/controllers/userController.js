@@ -150,3 +150,57 @@ export const sendMessage = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getRecentUsers = async (req, res, next) => {
+  try {
+    const currentUser = req.user;
+    if (!currentUser) {
+      const error = new Error("Unauthorized");
+      error.statusCode = 401;
+      return next(error);
+    }
+
+    const currentUserId = currentUser._id;
+
+    const recentChatUsers = await Message.aggregate([
+      {
+        $match: {
+          $or: [{ senderId: currentUserId }, { receiverId: currentUserId }],
+        },
+      },
+      { $sort: { createdAt: -1 } },
+      {
+        $project: {
+          chatPartnerId: {
+            $cond: [{ $eq: ["$senderId", currentUserId] }, "$receiverId", "$senderId"],
+          },
+          createdAt: 1,
+        },
+      },
+      {
+        $group: {
+          _id: "$chatPartnerId",
+          lastMessageAt: { $first: "$createdAt" },
+        },
+      },
+      { $sort: { lastMessageAt: -1 } },
+    ]);
+
+    if (!recentChatUsers.length) {
+      return res.status(200).json({ data: [] });
+    }
+
+    const orderedUserIds = recentChatUsers.map((item) => item._id.toString());
+
+    const users = await User.find({ _id: { $in: orderedUserIds } }).select("-password");
+    const usersById = new Map(users.map((user) => [user._id.toString(), user]));
+
+    const orderedUsers = orderedUserIds
+      .map((id) => usersById.get(id))
+      .filter(Boolean);
+
+    res.status(200).json({ data: orderedUsers });
+  } catch (error) {
+    next(error);
+  }
+};

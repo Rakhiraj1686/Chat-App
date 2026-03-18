@@ -1,24 +1,48 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import api from "../../config/api";
 import socketAPI from "../../config/WebSocket";
 import { GoDotFill } from "react-icons/go";
-import { FiSearch, FiUsers } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { HiOutlineChatBubbleLeftRight, HiOutlineUsers } from "react-icons/hi2";
 
 const ContactBar = ({ fetchMode, setReceiver }) => {
+  const navigate = useNavigate();
+  const { setUser, setIsLogin } = useAuth();
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [onlineUsers, setOnlineUsers] = useState({});
-  const [searchText, setSearchText] = useState("");
-  const [selectedId, setSelectedId] = useState("");
+  const [onlineUsers, setOnlineUsers] = useState();
+  const [selectedContactId, setSelectedContactId] = useState(null);
+
+  const modeTitle = fetchMode === "RC" ? "Recent Chats" : "All Contacts";
+  const modeSubtitle =
+    fetchMode === "RC"
+      ? "People you talked with recently"
+      : "Browse and start new conversations";
 
   const fetchContacts = async () => {
-    // Simulate an API call with a delay
     setLoading(true);
     try {
-      const res = await api.get("/user/allUsers");
-      setContacts(res.data.data || []);
+      let res;
+
+      if (fetchMode === "RC") {
+        res = await api.get("/user/recentUsers");
+        setContacts(res.data.data || []);
+      } else if (fetchMode === "AC") {
+        res = await api.get("/user/allUsers");
+        setContacts(res.data.data || []);
+      }
     } catch (error) {
+      if (error?.response?.status === 401) {
+        sessionStorage.removeItem("AppUser");
+        setUser(null);
+        setIsLogin(false);
+        toast.error("Session expired. Please login again.");
+        navigate("/login");
+        return;
+      }
+
       toast.error("Failed to load contacts. Please try again.");
     } finally {
       setLoading(false);
@@ -26,13 +50,12 @@ const ContactBar = ({ fetchMode, setReceiver }) => {
   };
 
   useEffect(() => {
-    // Simulate fetching contacts from an API when the component mounts
     fetchContacts();
   }, [fetchMode]);
 
-  const handleOnlineUsers = useCallback((onlineList) => {
-    setOnlineUsers(onlineList || {});
-  }, []);
+  const handleOnlineUsers = (onlineList) => {
+    setOnlineUsers(onlineList);
+  };
 
   useEffect(() => {
     socketAPI.on("onlineUsers", handleOnlineUsers);
@@ -40,114 +63,88 @@ const ContactBar = ({ fetchMode, setReceiver }) => {
     return () => {
       socketAPI.off("onlineUsers", handleOnlineUsers);
     };
-  }, [handleOnlineUsers]);
-
-  const visibleContacts = useMemo(() => {
-    const query = searchText.trim().toLowerCase();
-    if (!query) {
-      return contacts;
-    }
-
-    return contacts.filter((contact) => {
-      const fullName = contact.fullName?.toLowerCase() || "";
-      const email = contact.email?.toLowerCase() || "";
-      return fullName.includes(query) || email.includes(query);
-    });
-  }, [contacts, searchText]);
-
-  if (loading) {
-    return (
-      <div className="h-full bg-linear-to-b from-base-100 to-base-200 p-3">
-        <div className="animate-pulse space-y-3">
-          <div className="h-12 rounded-xl bg-base-300" />
-          <div className="h-10 rounded-xl bg-base-300" />
-          <div className="h-20 rounded-xl bg-base-300" />
-          <div className="h-20 rounded-xl bg-base-300" />
-          <div className="h-20 rounded-xl bg-base-300" />
-        </div>
-      </div>
-    );
-  }
+  }, []);
 
   return (
-    <div className="h-full bg-linear-to-b from-base-100 via-base-200 to-base-100 p-3 flex flex-col gap-3">
-      <div className="rounded-2xl bg-base-100/80 backdrop-blur border border-base-300 px-3 py-2 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-wider text-base-content/60">
-              {fetchMode === "RC" ? "Recent" : "All Contacts"}
-            </p>
-            <h2 className="text-lg font-bold text-base-content leading-tight">
-              Messages
-            </h2>
+    <div className="h-full bg-linear-to-b from-base-200 to-base-100 p-2">
+      <div className="flex h-full flex-col gap-3 rounded-xl border border-base-300 bg-base-100/90 p-3 shadow-sm">
+        <div className="rounded-lg border border-base-300 bg-base-200/70 p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-base-content">
+              {fetchMode === "RC" ? (
+                <HiOutlineChatBubbleLeftRight className="text-lg text-primary" />
+              ) : (
+                <HiOutlineUsers className="text-lg text-primary" />
+              )}
+              <h3 className="text-sm font-semibold tracking-wide">{modeTitle}</h3>
+            </div>
+            <span className="rounded-full bg-primary/10 px-2 py-1 text-xs font-semibold text-primary">
+              {contacts.length}
+            </span>
           </div>
-          <div className="badge badge-primary badge-outline gap-1 px-2 py-3">
-            <FiUsers />
-            {contacts.length}
-          </div>
+          <p className="mt-1 text-xs text-base-content/70">{modeSubtitle}</p>
         </div>
 
-        <label className="input input-bordered input-sm mt-3 flex items-center gap-2 bg-base-100">
-          <FiSearch className="text-base-content/60" />
-          <input
-            type="text"
-            className="grow"
-            placeholder="Search by name or email"
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-          />
-        </label>
-      </div>
+        <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+          {loading && (
+            <div className="flex h-full min-h-24 items-center justify-center rounded-lg border border-dashed border-base-300 text-sm text-base-content/70">
+              Loading contacts...
+            </div>
+          )}
 
-      <div className="overflow-y-auto pr-1 space-y-2">
-        {visibleContacts.length === 0 && (
-          <div className="h-40 rounded-2xl border border-dashed border-base-300 bg-base-100/50 flex items-center justify-center text-sm text-base-content/60 text-center px-4">
-            No contacts found for "{searchText}".
-          </div>
-        )}
+          {!loading && contacts.length === 0 && (
+            <div className="flex h-full min-h-24 items-center justify-center rounded-lg border border-dashed border-base-300 px-3 text-center text-sm text-base-content/70">
+              {fetchMode === "RC"
+                ? "No recent chats yet. Start chatting from All Contacts."
+                : "No contacts found."}
+            </div>
+          )}
 
-        {visibleContacts.map((contact) => {
-          const isSelected = selectedId === contact._id;
-          const isOnline = Boolean(onlineUsers[contact._id]);
+          {!loading &&
+            contacts.map((contact) => (
+              <div
+                key={contact._id}
+                className={`cursor-pointer rounded-xl border p-3 transition-all duration-200 ${
+                  selectedContactId === contact._id
+                    ? "border-primary bg-primary/10"
+                    : "border-base-300 bg-base-100 hover:border-primary/40 hover:bg-base-200/70"
+                }`}
+                onClick={() => {
+                  setSelectedContactId(contact._id);
+                  setReceiver(contact);
+                }}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="h-10 w-10 shrink-0 rounded-full bg-primary text-center leading-10 text-xs font-bold text-primary-content shadow-sm">
+                      {(contact.fullName || "U")
+                        .split(" ")
+                        .filter(Boolean)
+                        .slice(0, 2)
+                        .map((word) => word[0])
+                        .join("")
+                        .toUpperCase()}
+                    </div>
+                    <h4 className="line-clamp-1 text-sm font-semibold text-base-content">
+                      {contact.fullName}
+                    </h4>
+                  </div>
 
-          return (
-            <button
-              type="button"
-              key={contact._id}
-              className={`w-full text-left rounded-2xl border px-3 py-2 transition-all duration-200 ${
-                isSelected
-                  ? "border-primary bg-primary/10 shadow"
-                  : "border-base-300 bg-base-100 hover:border-primary/40 hover:shadow-sm"
-              }`}
-              onClick={() => {
-                setSelectedId(contact._id);
-                setReceiver(contact);
-              }}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="font-semibold text-base-content truncate">
-                    {contact.fullName}
-                  </p>
-                  <p className="text-xs text-base-content/70 truncate">
-                    {contact.email}
-                  </p>
-                  <p className="text-sm text-base-content/90 mt-1">
-                    {contact.mobileNumber || "No number"}
-                  </p>
+                  {onlineUsers && onlineUsers[contact._id] && (
+                    <span className="flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-medium text-success">
+                      <GoDotFill className="text-xs" />
+                      Online
+                    </span>
+                  )}
                 </div>
-                <div className="flex items-center gap-1 text-xs mt-1 shrink-0">
-                  <GoDotFill
-                    className={isOnline ? "text-green-500" : "text-base-300"}
-                  />
-                  <span className={isOnline ? "text-green-600" : "text-base-content/50"}>
-                    {isOnline ? "Online" : "Offline"}
-                  </span>
-                </div>
+                {contact.mobileNumber && (
+                  <p className="mt-1 text-xs font-medium text-base-content/80">
+                    {contact.mobileNumber}
+                  </p>
+                )}
               </div>
-            </button>
-          );
-        })}
+            ))}
+        </div>
       </div>
     </div>
   );

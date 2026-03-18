@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getAllUsers,
+  getRecentUsers,
   updateProfile,
   fetchMessages,
   sendMessage,
@@ -11,6 +12,9 @@ const router = express.Router();
 
 // Get all users
 router.get("/allUsers", Protect, getAllUsers);
+
+// Get recent chat users
+router.get("/recentUsers", Protect, getRecentUsers);
 
 // Update current user profile
 router.put("/profile", Protect, updateProfile);
