@@ -2,127 +2,172 @@ import React from "react";
 import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
 
-const quickStats = [
-  { value: "99.9%", label: "Message delivery uptime" },
-  { value: "<120ms", label: "Average real-time latency" },
-  { value: "24/7", label: "Cross-device sync" },
+const liveStats = [
+  { value: "1.2M+", label: "Messages exchanged" },
+  { value: "58K", label: "Daily active chats" },
+  { value: "99.9%", label: "Delivery uptime" },
+  { value: "120ms", label: "Average latency" },
 ];
 
-const featureCards = [
+const valueCards = [
   {
-    title: "Rooms That Move Fast",
+    title: "Fast Rooms",
     description:
-      "Create focused channels for teams, projects, or communities and keep every conversation organized.",
+      "Make separate spaces for family, friends, and projects so every chat stays clear and focused.",
   },
   {
-    title: "Secure Account Flow",
+    title: "Simple Login",
     description:
-      "Email login and Google auth are integrated so users can onboard quickly without compromising security.",
+      "Use email or Google sign-in and jump into conversations in seconds, no setup headache.",
   },
   {
-    title: "Zero-Noise Interface",
+    title: "Clean UI",
     description:
-      "A clean layout and readable hierarchy keep your attention on messages instead of clutter.",
+      "A distraction-free interface keeps your eyes on people, not on cluttered controls.",
+  },
+];
+
+const moments = [
+  {
+    title: "Family Circle",
+    text: "Share daily updates and keep everyone connected in one warm, private room.",
+    tone: "from-primary/10 to-primary/5 border-primary/30",
+  },
+  {
+    title: "Friends Hangout",
+    text: "Plan trips, send memes, and keep the group vibe alive with instant replies.",
+    tone: "from-secondary/10 to-secondary/5 border-secondary/30",
+  },
+  {
+    title: "Team Sprint",
+    text: "Turn ideas into execution using channel-based discussions and real-time updates.",
+    tone: "from-accent/15 to-accent/5 border-accent/30",
   },
 ];
 
 const Home = () => {
   return (
-    <main className="min-h-[calc(100vh-64px)] bg-linear-to-b from-cyan-50 via-sky-50 to-slate-100 text-slate-800">
-      <section className="mx-auto max-w-6xl px-4 py-12 md:px-8 md:py-20">
-        <div className="grid items-center gap-10 md:grid-cols-2">
-          <div>
-            <p className="mb-3 inline-flex rounded-full border border-cyan-300 bg-cyan-100/60 px-3 py-1 text-xs font-semibold tracking-[0.08em] text-cyan-900">
-              REAL-TIME CHAT, BUILT FOR FLOW
+    <main className="min-h-[calc(100vh-64px)] bg-linear-to-b from-base-200 via-base-100 to-base-200 text-base-content">
+      <section className="relative overflow-hidden">
+        <div className="pointer-events-none absolute -left-20 top-12 h-56 w-56 rounded-full bg-primary/25 blur-3xl" />
+        <div className="pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full bg-secondary/25 blur-3xl" />
+
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 md:grid-cols-2 md:px-8 md:py-20">
+          <div className="fade-up-soft">
+            <p className="inline-flex rounded-full border border-base-300 bg-base-100/80 px-3 py-1 text-xs font-semibold tracking-widest text-base-content/70">
+              DOSTIHUB REAL-TIME EXPERIENCE
             </p>
-            <h1 className="text-4xl font-black leading-tight text-slate-900 sm:text-5xl md:text-6xl">
-              Talk faster.
-              <br />
-              Ship together.
+
+            <h1 className="mt-4 text-4xl font-black leading-tight text-base-content sm:text-5xl md:text-6xl" style={{ fontFamily: "Sora, Poppins, sans-serif" }}>
+              Chat that feels
+              <span className="block text-primary">alive and personal.</span>
             </h1>
-            <p className="mt-4 max-w-xl text-base text-slate-600 md:text-lg">
-              ChatKro keeps your team aligned with fast messaging, simple rooms,
-              and a distraction-free interface made for daily collaboration.
+
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-base-content/75 md:text-lg">
+              DostiHub is built for real people and real conversations, from
+              family groups to fast-moving teams. Instant updates, easy rooms,
+              and zero chaos.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Link to="/register" className="btn btn-primary btn-lg">
-                Create Account
+                Start Free
+              </Link>
+              <Link to="/chatting" className="btn btn-accent btn-outline btn-lg">
+                Explore Live Chat
               </Link>
               <Link to="/login" className="btn btn-secondary btn-outline btn-lg">
                 Sign In
               </Link>
-              <Link to="/chatting" className="btn btn-accent btn-outline btn-lg">
-                Open Chat
-              </Link>
             </div>
           </div>
 
-          <div className="rounded-3xl border border-cyan-200 bg-white/90 shadow-2xl shadow-cyan-900/10 backdrop-blur">
-            <div className="flex items-center gap-2 border-b border-cyan-100 bg-sky-50 px-4 py-3">
-              <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
-              <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-              <p className="ml-2 text-xs text-slate-500">chatkro.live/rooms/product</p>
-            </div>
-
-            <div className="space-y-3 p-4">
-              <div className="flex w-fit max-w-[85%] items-center gap-2 rounded-xl border border-sky-100 bg-sky-50 p-3 text-sm">
-                <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-sky-100 text-[11px] font-bold text-sky-800">
-                  PM
-                </span>
-                <p>Sprint review moved to 4:00 PM. Agenda is updated.</p>
+          <div className="fade-up-soft relative" style={{ animationDelay: "120ms" }}>
+            <div className="rounded-3xl border border-primary/30 bg-base-100/90 p-4 shadow-2xl shadow-base-content/10 backdrop-blur md:p-5">
+              <div className="mb-4 rounded-2xl border border-base-300 bg-base-200/70 p-4">
+                <p className="text-xs font-semibold tracking-wide text-base-content/60">LIVE ROOM</p>
+                <h3 className="mt-1 text-xl font-black text-base-content">Weekend Plan Squad</h3>
+                <div className="mt-3 space-y-2 text-sm text-base-content/80">
+                  <p className="w-fit rounded-xl border border-primary/25 bg-primary/10 px-3 py-2">Priya: Sunday trekking fixed?</p>
+                  <p className="ml-auto w-fit rounded-xl border border-secondary/25 bg-secondary/10 px-3 py-2">Aman: Yes, 6:30 AM pickup.</p>
+                  <p className="w-fit rounded-xl border border-accent/25 bg-accent/10 px-3 py-2">Rohit: Snacks list bhi share kar do.</p>
+                </div>
               </div>
 
-              <div className="ml-auto w-fit max-w-[85%] rounded-xl border border-cyan-200 bg-cyan-100 p-3 text-sm text-cyan-950">
-                <p>Perfect. I will post release notes before the meeting.</p>
-              </div>
-
-              <div className="flex w-fit max-w-[85%] items-center gap-2 rounded-xl border border-sky-100 bg-sky-50 p-3 text-sm">
-                <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-sky-100 text-[11px] font-bold text-sky-800">
-                  UX
-                </span>
-                <p>New onboarding screen is merged. Ready for QA.</p>
+              <div className="grid grid-cols-2 gap-3">
+                {liveStats.map((item) => (
+                  <article key={item.label} className="rounded-xl border border-base-300 bg-base-100 p-3 shadow-sm">
+                    <p className="text-2xl font-black text-base-content">{item.value}</p>
+                    <p className="text-xs text-base-content/65">{item.label}</p>
+                  </article>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 pb-10 md:px-8">
-        <div className="grid gap-3 md:grid-cols-3">
-          {quickStats.map((item) => (
+      <section className="mx-auto max-w-6xl px-4 pb-14 md:px-8 md:pb-20">
+        <div className="mb-7 flex items-end justify-between gap-3">
+          <div>
+            <p className="mb-2 inline-flex rounded-full border border-primary/35 bg-primary/10 px-3 py-1 text-xs font-semibold tracking-wider text-primary">
+              MADE FOR EVERY TYPE OF CHAT
+            </p>
+            <h2 className="text-2xl font-black text-base-content md:text-4xl" style={{ fontFamily: "Sora, Poppins, sans-serif" }}>
+              One app, many vibes
+            </h2>
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          {moments.map((item, index) => (
             <article
-              key={item.label}
-              className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm backdrop-blur"
+              key={item.title}
+              className={`stagger-soft rounded-3xl border bg-linear-to-br p-6 shadow-md ${item.tone}`}
+              style={{ animationDelay: `${index * 140}ms` }}
             >
-              <h3 className="text-3xl font-black text-slate-900">{item.value}</h3>
-              <p className="mt-1 text-slate-600">{item.label}</p>
+              <h3 className="text-xl font-black text-base-content">{item.title}</h3>
+              <p className="mt-2 leading-relaxed text-base-content/75">{item.text}</p>
             </article>
           ))}
         </div>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-16 md:px-8 md:pb-24">
-        <div className="mb-7">
-          <p className="mb-2 inline-flex rounded-full border border-cyan-300 bg-cyan-100/60 px-3 py-1 text-xs font-semibold tracking-[0.08em] text-cyan-900">
-            WHY CHATKRO
-          </p>
-          <h2 className="text-2xl font-black text-slate-900 md:text-4xl">
-            Built for focused conversations
-          </h2>
-        </div>
-
         <div className="grid gap-4 md:grid-cols-3">
-          {featureCards.map((feature) => (
+          {valueCards.map((item, index) => (
             <article
-              key={feature.title}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg hover:shadow-cyan-900/10"
+              key={item.title}
+              className="stagger-soft rounded-2xl border border-base-300 bg-base-100/90 p-5 shadow-sm"
+              style={{ animationDelay: `${index * 120}ms` }}
             >
-              <h3 className="text-xl font-bold text-slate-900">{feature.title}</h3>
-              <p className="mt-2 leading-relaxed text-slate-600">{feature.description}</p>
+              <p className="text-xs font-semibold tracking-wider text-info">FEATURE 0{index + 1}</p>
+              <h3 className="mt-2 text-xl font-black text-base-content">{item.title}</h3>
+              <p className="mt-2 text-base-content/70">{item.description}</p>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pb-16 md:px-8 md:pb-24">
+        <div className="fade-up-soft rounded-3xl border border-primary/35 bg-primary p-7 text-primary-content shadow-2xl md:p-10">
+          <p className="text-xs font-semibold tracking-widest text-primary-content/75">READY TO CONNECT</p>
+          <h2 className="mt-2 text-3xl font-black leading-tight md:text-5xl" style={{ fontFamily: "Sora, Poppins, sans-serif" }}>
+            Bring your people together in one place.
+          </h2>
+          <p className="mt-3 max-w-2xl text-primary-content/80">
+            Start your first room in less than 2 minutes and feel the difference
+            of instant, meaningful conversation.
+          </p>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link to="/register" className="btn btn-accent btn-lg">
+              Create Your Room
+            </Link>
+            <Link to="/about" className="btn btn-ghost btn-outline btn-lg text-primary-content">
+              Learn More
+            </Link>
+          </div>
         </div>
       </section>
 
