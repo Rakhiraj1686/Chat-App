@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import api from "../config/api.jsx";
+import api from "../config/api";
 import { Link, useNavigate } from "react-router-dom";
 import { useGoogleAuth } from "../config/GoogleAuth.jsx";
 import { FcGoogle } from "react-icons/fc";

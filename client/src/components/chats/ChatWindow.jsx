@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import api from "../../config/api.jsx";
+import api from "../../config/api";
 import { useAuth } from "../../context/AuthContext";
 import socketAPI from "../../config/WebSocket.jsx";
 import { FaSmile, FaPaperclip } from "react-icons/fa";

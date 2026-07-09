@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
-import api from "../../config/api.jsx";
+import api from "../../config/api";
 import socketAPI from "../../config/WebSocket.jsx";
 import { GoDotFill } from "react-icons/go";
 import { useNavigate } from "react-router-dom";
