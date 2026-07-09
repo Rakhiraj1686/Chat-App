@@ -4,7 +4,7 @@ import ContactBar from "../components/chats/ContactBar";
 import ChatWindow from "../components/chats/ChatWindow";
 import { useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import socketAPI from "../config/WebSocket";
+import socketAPI from "../config/WebSocket.jsx";
 import { useNavigate } from "react-router-dom";
 
 const Chating = () => {

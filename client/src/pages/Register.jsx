@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import api from "../config/api";
+import api from "../config/api.jsx";
 import { Link } from "react-router-dom";
 import { MdLock, MdMail, MdOutlineArrowOutward, MdPerson, MdPhone } from "react-icons/md";
 import { RiChatSmile3Line } from "react-icons/ri";

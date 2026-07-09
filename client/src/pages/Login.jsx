@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import toast from "react-hot-toast";
 import api from "../config/api.jsx";
 import { Link, useNavigate } from "react-router-dom";
-import { useGoogleAuth } from "../config/GoogleAuth";
+import { useGoogleAuth } from "../config/GoogleAuth.jsx";
 import { FcGoogle } from "react-icons/fc";
 import { useAuth } from "../context/AuthContext";
 import { MdLock, MdMail, MdOutlineArrowOutward } from "react-icons/md";
