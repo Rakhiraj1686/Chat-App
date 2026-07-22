@@ -80,12 +80,14 @@ dotenv.config();
 
 const app = express();
 
-// Middlewares
+
+// ===================== MIDDLEWARES =====================
+
 app.use(
   cors({
     origin: "http://localhost:5173",
     credentials: true,
-  }),
+  })
 );
 
 app.use(express.json({ limit: "10mb" }));
@@ -93,19 +95,33 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan("dev"));
 
-// Routes
-app.use("/auth", AuthRouter);
-app.use("/user", UserRouter);
 
-// Health check (optional but recommended)
+// ===================== ROUTES =====================
+
+// Auth Routes
+app.use("/api/auth", AuthRouter);
+
+// User Routes
+app.use("/api/user", UserRouter);
+
+
+// ===================== HEALTH CHECK =====================
+
 app.get("/", (req, res) => {
-  res.status(200).json({ message: "API is running 🚀" });
+  res.status(200).json({
+    success: true,
+    message: "API is running 🚀",
+  });
 });
 
-// Global error handler
+
+// ===================== GLOBAL ERROR HANDLER =====================
+
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
+
+  const message =
+    err.message || "Internal Server Error";
 
   console.error("❌ Error:", err);
 
@@ -115,10 +131,15 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server ONLY after DB connects
+
+// ===================== HTTP SERVER =====================
+
 const PORT = process.env.PORT || 5000;
 
 const httpServer = http.createServer(app);
+
+
+// ===================== SOCKET.IO =====================
 
 const io = new Server(httpServer, {
   cors: {
@@ -128,9 +149,20 @@ const io = new Server(httpServer, {
   },
 });
 
+
+// Initialize WebSocket
 WebSocket(io);
 
+
+// ===================== START SERVER =====================
+
 httpServer.listen(PORT, async () => {
-  await connectDB();
-  console.log("🔗 Server Started at : ", PORT);
+  try {
+    await connectDB();
+
+    console.log(`🚀 Server Started at: ${PORT}`);
+    console.log(`🔗 API: http://localhost:${PORT}`);
+  } catch (error) {
+    console.error("❌ Database connection failed:", error);
+  }
 });

@@ -1,36 +1,43 @@
 import { OAuth2Client } from "google-auth-library";
 
-export async function verify() {
-  const client = new OAuth2Client();
-  const ticket = await client.verifyIdToken({
-    idToken: token,
-    audience: process.env.GOOGLE_CLIENT_ID,
-  });
-  const payload = ticket.getPayload();
-
-  return payload;
-}
-
 export const GoogleProtect = async (req, res, next) => {
   try {
-    const { idToken, email, id } = req.body;
-    console.log({ email, id });
+    const { idToken } = req.body;
 
-    const client = new OAuth2Client();
-    const ticket = await client.verifyIdToken({
-      idToken: idToken,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-    const payload = ticket.getPayload();
-    console.log(payload);
-
-    if (email !== payload.email || id !== payload.sub) {
-      const error = new Error("User Not Verified");
-      error.statusCode = 400;
+    if (!idToken) {
+      const error = new Error("Google ID token is required");
+      error.statusCode = 401;
       return next(error);
     }
+
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    if (!payload?.email || !payload?.sub) {
+      const error = new Error("Invalid Google account");
+      error.statusCode = 401;
+      return next(error);
+    }
+
+    req.googleUser = {
+      id: payload.sub,
+      email: payload.email,
+      name: payload.name,
+      imageUrl: payload.picture,
+    };
+
     next();
   } catch (error) {
-    next(error);
+    console.error("Google verification failed:", error.message);
+
+    const err = new Error("Invalid Google token");
+    err.statusCode = 401;
+    next(err);
   }
 };

@@ -2,15 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
-import { FaLongArrowAltLeft } from "react-icons/fa";
-import { MdLogout } from "react-icons/md";
-
-const profileHints = [
-  "A complete profile helps your friends recognize you and makes it easier to connect.",
-  "Use a friendly display name that your contacts will recognize.",
-  "Add a short bio to let people know more about you.",
-  "Keep your email and phone number up to date for account recovery and notifications.",
-];
+import { FaArrowLeft, FaCamera } from "react-icons/fa";
+import {
+  MdEdit,
+  MdLogout,
+  MdMail,
+  MdPhone,
+  MdPerson,
+  MdSave,
+} from "react-icons/md";
 
 const getProfileForm = (account) => ({
   fullName: account?.fullName || account?.name || "",
@@ -25,28 +25,32 @@ const UserDashboard = () => {
 
   const currentUser =
     user || JSON.parse(sessionStorage.getItem("AppUser") || "null");
-  const [profileForm, setProfileForm] = useState(getProfileForm(currentUser));
-  const [mobilePanel, setMobilePanel] = useState("summary");
+
+  const [profileForm, setProfileForm] = useState(
+    getProfileForm(currentUser)
+  );
+
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     setProfileForm(getProfileForm(currentUser));
   }, [user]);
 
   const userName =
-    currentUser?.fullName || currentUser?.name || "DostiHUB User";
-  const userEmail = currentUser?.email || "No email found";
-  const userPhone =
-    currentUser?.mobileNumber || currentUser?.phoneNumber || "Not added yet";
-  const userAbout =
-    currentUser?.about || "Tell people about yourself in a few lines.";
+    currentUser?.fullName ||
+    currentUser?.name ||
+    "DostiHUB User";
 
-  const completedProfileFields = [
-    currentUser?.fullName || currentUser?.name,
-    currentUser?.email,
-    currentUser?.mobileNumber || currentUser?.phoneNumber,
-    currentUser?.about,
-  ].filter(Boolean).length;
-  const profileStrength = Math.min(100, completedProfileFields * 25);
+  const userEmail = currentUser?.email || "No email added";
+
+  const userPhone =
+    currentUser?.mobileNumber ||
+    currentUser?.phoneNumber ||
+    "No phone added";
+
+  const userAbout =
+    currentUser?.about ||
+    "Hey there! I am using DostiHUB.";
 
   const initials = userName
     .split(" ")
@@ -55,30 +59,55 @@ const UserDashboard = () => {
     .map((part) => part[0]?.toUpperCase())
     .join("");
 
+  const profileFields = [
+    currentUser?.fullName || currentUser?.name,
+    currentUser?.email,
+    currentUser?.mobileNumber || currentUser?.phoneNumber,
+    currentUser?.about,
+  ];
+
+  const profileStrength = Math.min(
+    100,
+    profileFields.filter(Boolean).length * 25
+  );
+
   const handleLogout = () => {
     sessionStorage.removeItem("AppUser");
+
     setUser(null);
     setIsLogin(false);
+
+    toast.success("Logged out successfully");
     navigate("/login");
   };
 
-  const handleProfileChange = (event) => {
+  const handleChange = (event) => {
     const { name, value } = event.target;
-    setProfileForm((prev) => ({ ...prev, [name]: value }));
+
+    setProfileForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleResetProfile = () => {
+  const handleReset = () => {
     setProfileForm(getProfileForm(currentUser));
+    setIsEditing(false);
   };
 
   const handleSaveProfile = (event) => {
     event.preventDefault();
 
+    if (!profileForm.fullName.trim()) {
+      toast.error("Name is required");
+      return;
+    }
+
     if (
       profileForm.email &&
       !/^[\w.-]+@[\w.-]+\.[A-Za-z]{2,}$/.test(profileForm.email)
     ) {
-      toast.error("Please enter a valid email address.");
+      toast.error("Please enter a valid email address");
       return;
     }
 
@@ -86,7 +115,7 @@ const UserDashboard = () => {
       profileForm.mobileNumber &&
       !/^[0-9]{10,15}$/.test(profileForm.mobileNumber)
     ) {
-      toast.error("Phone number should contain 10  digits.");
+      toast.error("Phone number should contain 10-15 digits");
       return;
     }
 
@@ -98,238 +127,306 @@ const UserDashboard = () => {
       about: profileForm.about.trim(),
     };
 
-    sessionStorage.setItem("AppUser", JSON.stringify(updatedUser));
+    sessionStorage.setItem(
+      "AppUser",
+      JSON.stringify(updatedUser)
+    );
+
     setUser(updatedUser);
+    setIsEditing(false);
+
     toast.success("Profile updated successfully");
   };
 
   return (
-    <main className="min-h-[calc(100vh-64px)] bg-base-200 px-3 py-6 md:px-8 md:py-10">
-      <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-2xl">
-        <div className="h-28 bg-primary" />
+    <main className="min-h-[calc(100vh-64px)] bg-base-200 px-3 py-5 md:px-6 md:py-8">
+      <div className="mx-auto max-w-5xl">
 
-        <div className="-mt-16 px-4 pb-6 md:px-6">
-          <div className="mb-4 rounded-xl bg-base-200 p-1 lg:hidden">
-            <div className="grid grid-cols-2 gap-1">
-              <button
-                type="button"
-                onClick={() => setMobilePanel("summary")}
-                className={`btn btn-sm border-none ${
-                  mobilePanel === "summary"
-                    ? "btn-primary text-primary-content"
-                    : "bg-transparent text-base-content"
-                }`}
-              >
-                Profile
-              </button>
-              <button
-                type="button"
-                onClick={() => setMobilePanel("edit")}
-                className={`btn btn-sm border-none ${
-                  mobilePanel === "edit"
-                    ? "btn-primary text-primary-content"
-                    : "bg-transparent text-base-content"
-                }`}
-              >
-                Edit
-              </button>
+        {/* Top Navigation */}
+        <div className="mb-5 flex items-center justify-between">
+          <Link
+            to="/chatting"
+            className="btn btn-ghost gap-2 rounded-xl"
+          >
+            <FaArrowLeft />
+            Back to Chat
+          </Link>
+
+          <button
+            onClick={handleLogout}
+            className="btn btn-ghost btn-error gap-2 rounded-xl"
+          >
+            <MdLogout className="text-lg" />
+            Logout
+          </button>
+        </div>
+
+        {/* Profile Card */}
+        <section className="overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-xl">
+
+          {/* Cover */}
+          <div className="h-32 bg-primary md:h-44" />
+
+          {/* Profile Header */}
+          <div className="relative px-5 pb-6 md:px-8">
+
+            <div className="-mt-14 flex flex-col items-center gap-4 sm:flex-row sm:items-end">
+
+              {/* Avatar */}
+              <div className="relative">
+                <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-base-100 bg-primary text-4xl font-bold text-primary-content shadow-xl">
+                  {initials || "DU"}
+                </div>
+
+                <button
+                  type="button"
+                  className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full bg-base-100 text-primary shadow-md"
+                  onClick={() =>
+                    toast("Profile photo upload coming soon")
+                  }
+                >
+                  <FaCamera />
+                </button>
+              </div>
+
+              {/* Name */}
+              <div className="flex-1 text-center sm:text-left">
+                <h1 className="text-2xl font-black md:text-3xl">
+                  {userName}
+                </h1>
+
+                <p className="mt-1 text-sm text-base-content/60">
+                  {userEmail}
+                </p>
+              </div>
+
+              {/* Edit Button */}
+              {!isEditing && (
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="btn btn-primary gap-2 rounded-xl"
+                >
+                  <MdEdit className="text-lg" />
+                  Edit Profile
+                </button>
+              )}
+            </div>
+
+            {/* Profile Strength */}
+            <div className="mt-6 rounded-2xl bg-base-200 p-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold">
+                  Profile completion
+                </p>
+
+                <span className="font-bold text-primary">
+                  {profileStrength}%
+                </span>
+              </div>
+
+              <progress
+                className="progress progress-primary mt-3 h-2 w-full"
+                value={profileStrength}
+                max="100"
+              />
             </div>
           </div>
 
-          <div className="overflow-hidden">
-            <div
-              className={`flex gap-6 transition-transform duration-300 ease-out lg:grid lg:grid-cols-[320px_1fr] lg:gap-6 ${
-                mobilePanel === "summary"
-                  ? "translate-x-0"
-                  : "-translate-x-[calc(100%+1.5rem)]"
-              } lg:translate-x-0`}
-            >
-              <aside className="min-w-full rounded-2xl border border-base-300 bg-base-200 p-4 lg:min-w-0">
-                <div className="flex flex-col items-center text-center">
-                  <div className="avatar avatar-placeholder">
-                    <div className="bg-primary text-primary-content h-24 w-24 rounded-full text-3xl font-bold">
-                      <span>{initials || "DU"}</span>
-                    </div>
+          {/* Content */}
+          <div className="grid gap-6 border-t border-base-300 p-5 md:grid-cols-2 md:p-8">
+
+            {/* Profile Information */}
+            <section>
+              <div className="mb-4">
+                <p className="text-xs font-bold uppercase tracking-widest text-primary">
+                  Profile
+                </p>
+
+                <h2 className="mt-1 text-2xl font-black">
+                  Personal Information
+                </h2>
+              </div>
+
+              <div className="space-y-3">
+
+                {/* Email */}
+                <div className="flex items-center gap-4 rounded-2xl bg-base-200 p-4">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <MdMail className="text-xl" />
                   </div>
 
-                  <h1 className="mt-3 text-2xl font-bold text-base-content">
-                    {userName}
-                  </h1>
-                  <p className="text-sm text-base-content/70">Available</p>
-
-                  <div className="mt-4 w-full rounded-xl bg-base-100 p-3 text-left">
-                    <p className="text-primary text-xs font-semibold uppercase tracking-wide">
-                      Profile Strength
-                    </p>
-                    <p className="mt-1 text-2xl font-bold text-base-content">
-                      {profileStrength}%
-                    </p>
-                    <progress
-                      className="progress progress-success mt-2 h-2 w-full"
-                      value={profileStrength}
-                      max="100"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-4 space-y-3">
-                  <div className="rounded-xl bg-base-100 p-3">
-                    <p className="text-xs uppercase text-base-content/70">
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold uppercase text-base-content/50">
                       Email
                     </p>
-                    <p className="text-sm font-medium text-base-content">
+
+                    <p className="truncate font-medium">
                       {userEmail}
                     </p>
                   </div>
-                  <div className="rounded-xl bg-base-100 p-3">
-                    <p className="text-xs uppercase text-base-content/70">
+                </div>
+
+                {/* Phone */}
+                <div className="flex items-center gap-4 rounded-2xl bg-base-200 p-4">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <MdPhone className="text-xl" />
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-semibold uppercase text-base-content/50">
                       Phone
                     </p>
-                    <p className="text-sm font-medium text-base-content">
+
+                    <p className="font-medium">
                       {userPhone}
                     </p>
                   </div>
-                  <div className="rounded-xl bg-base-100 p-3">
-                    <p className="text-xs uppercase text-base-content/70">
-                      About
-                    </p>
-                    <p className="text-sm font-medium text-base-content">
-                      {userAbout}
-                    </p>
-                  </div>
                 </div>
 
-                <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
-                  <Link to="/chatting" className="btn btn-primary">
-                    <FaLongArrowAltLeft /> Back to Chats
-                  </Link>
+                {/* About */}
+                <div className="rounded-2xl bg-base-200 p-4">
+                  <p className="text-xs font-semibold uppercase text-base-content/50">
+                    About
+                  </p>
+
+                  <p className="mt-2 leading-relaxed text-base-content/80">
+                    {userAbout}
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* Edit Profile */}
+            <section>
+              <div className="mb-4">
+                <p className="text-xs font-bold uppercase tracking-widest text-primary">
+                  Account Settings
+                </p>
+
+                <h2 className="mt-1 text-2xl font-black">
+                  {isEditing ? "Edit Profile" : "Your Account"}
+                </h2>
+              </div>
+
+              {!isEditing ? (
+                <div className="rounded-2xl border border-base-300 bg-base-200 p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-content">
+                      <MdPerson className="text-2xl" />
+                    </div>
+
+                    <div>
+                      <h3 className="font-bold">
+                        Keep your profile updated
+                      </h3>
+
+                      <p className="mt-1 text-sm leading-6 text-base-content/65">
+                        Add your name, contact details, and a short bio so
+                        your friends can easily recognize you.
+                      </p>
+                    </div>
+                  </div>
+
                   <button
-                    type="button"
-                    className="btn btn-outline lg:hidden"
-                    onClick={() => setMobilePanel("edit")}
+                    onClick={() => setIsEditing(true)}
+                    className="btn btn-primary mt-5 w-full rounded-xl"
                   >
+                    <MdEdit />
                     Edit Profile
                   </button>
-                  <button
-                    className="btn btn-outline btn-error"
-                    onClick={handleLogout}
-                  >
-                    Logout <MdLogout className="ml-1" />
-                  </button>
                 </div>
-              </aside>
-
-              <section className="min-w-full rounded-2xl border border-base-300 bg-base-200 p-4 md:p-5 lg:min-w-0">
-                <div className="mb-4 border-b border-base-300 pb-3">
-                  <p className="text-primary text-xs font-semibold uppercase tracking-wide">
-                    Profile
-                  </p>
-                  <h2 className="text-2xl font-bold text-base-content">
-                    Edit Your Details
-                  </h2>
-                  <p className="text-sm text-base-content/70">
-                    Update your profile information to keep your contacts
-                    informed.
-                  </p>
-                </div>
-
+              ) : (
                 <form
                   onSubmit={handleSaveProfile}
-                  onReset={handleResetProfile}
                   className="space-y-4"
                 >
-                  <div className="rounded-xl border border-base-300 bg-base-100 p-3">
-                    <label className="text-primary mb-1 block text-xs font-semibold uppercase tracking-wide">
-                      Name
-                    </label>
+
+                  {/* Name */}
+                  <label className="block">
+                    <span className="mb-2 block text-sm font-semibold">
+                      Full Name
+                    </span>
+
                     <input
                       type="text"
                       name="fullName"
-                      placeholder="Your display name"
                       value={profileForm.fullName}
-                      onChange={handleProfileChange}
-                      className="input input-bordered h-11 w-full"
+                      onChange={handleChange}
+                      placeholder="Your full name"
+                      className="input input-bordered w-full"
                     />
-                  </div>
+                  </label>
 
-                  <div className="rounded-xl border border-base-300 bg-base-100 p-3">
-                    <label className="text-primary mb-1 block text-xs font-semibold uppercase tracking-wide">
+                  {/* Email */}
+                  <label className="block">
+                    <span className="mb-2 block text-sm font-semibold">
+                      Email
+                    </span>
+
+                    <input
+                      type="email"
+                      name="email"
+                      value={profileForm.email}
+                      onChange={handleChange}
+                      placeholder="name@email.com"
+                      className="input input-bordered w-full"
+                    />
+                  </label>
+
+                  {/* Phone */}
+                  <label className="block">
+                    <span className="mb-2 block text-sm font-semibold">
+                      Phone Number
+                    </span>
+
+                    <input
+                      type="tel"
+                      name="mobileNumber"
+                      value={profileForm.mobileNumber}
+                      onChange={handleChange}
+                      placeholder="10 digit mobile number"
+                      className="input input-bordered w-full"
+                    />
+                  </label>
+
+                  {/* About */}
+                  <label className="block">
+                    <span className="mb-2 block text-sm font-semibold">
                       About
-                    </label>
+                    </span>
+
                     <textarea
                       name="about"
-                      placeholder="Hey there! I am using DostiHUB"
                       value={profileForm.about}
-                      onChange={handleProfileChange}
-                      rows={3}
+                      onChange={handleChange}
+                      placeholder="Tell something about yourself..."
+                      rows={4}
                       className="textarea textarea-bordered w-full"
                     />
-                  </div>
+                  </label>
 
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="rounded-xl border border-base-300 bg-base-100 p-3">
-                      <label className="text-primary mb-1 block text-xs font-semibold uppercase tracking-wide">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        placeholder="name@email.com"
-                        value={profileForm.email}
-                        onChange={handleProfileChange}
-                        className="input input-bordered h-11 w-full"
-                      />
-                    </div>
-
-                    <div className="rounded-xl border border-base-300 bg-base-100 p-3">
-                      <label className="text-primary mb-1 block text-xs font-semibold uppercase tracking-wide">
-                        Phone
-                      </label>
-                      <input
-                        type="tel"
-                        name="mobileNumber"
-                        placeholder="10 digit number"
-                        value={profileForm.mobileNumber}
-                        onChange={handleProfileChange}
-                        className="input input-bordered h-11 w-full"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="rounded-xl border border-base-300 bg-base-100 p-3">
-                    <p className="text-primary text-xs font-semibold uppercase tracking-wide">
-                      Quick Tips
-                    </p>
-                    <ul className="mt-2 space-y-2 text-sm text-base-content/70">
-                      {profileHints.map((hint) => (
-                        <li key={hint} className="rounded-lg bg-base-200 p-2">
-                          {hint}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <button type="reset" className="btn btn-outline flex-1">
-                      Reset
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={handleReset}
+                      className="btn btn-outline flex-1 rounded-xl"
+                    >
+                      Cancel
                     </button>
-                    <button type="submit" className="btn btn-primary flex-1">
+
+                    <button
+                      type="submit"
+                      className="btn btn-primary flex-1 gap-2 rounded-xl"
+                    >
+                      <MdSave className="text-lg" />
                       Save Changes
                     </button>
                   </div>
-
-                  <button
-                    type="button"
-                    className="btn btn-outline mt-2 w-full lg:hidden"
-                    onClick={() => setMobilePanel("summary")}
-                  >
-                    Back to Profile
-                  </button>
                 </form>
-              </section>
-            </div>
+              )}
+            </section>
           </div>
-        </div>
+        </section>
       </div>
     </main>
   );

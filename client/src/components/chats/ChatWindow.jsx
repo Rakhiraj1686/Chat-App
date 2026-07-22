@@ -1,13 +1,16 @@
+
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import api from "../../config/api";
 import { useAuth } from "../../context/AuthContext";
 import socketAPI from "../../config/WebSocket.jsx";
 import { FaSmile, FaPaperclip } from "react-icons/fa";
+import { IoArrowBack } from "react-icons/io5";
 import EmojiPicker from "emoji-picker-react";
 
-const ChatWindow = ({ receiver }) => {
+const ChatWindow = ({ receiver, onBack }) => {
   const { user } = useAuth();
+
   const bottomRef = useRef(null);
   const fileRef = useRef(null);
 
@@ -18,16 +21,19 @@ const ChatWindow = ({ receiver }) => {
   const [inputMessage, setInputMessage] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
 
-  const scrolltoBottom = () => {
+  const scrollToBottom = () => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
-    scrolltoBottom();
+    scrollToBottom();
   }, [messages]);
 
   const handleKeyDown = (e) => {
-    e.key === "Enter" && handleSend();
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSend();
+    }
   };
 
   const handleSend = async () => {
@@ -54,19 +60,28 @@ const ChatWindow = ({ receiver }) => {
     const timestamp = new Date().toISOString();
 
     try {
-      if (socketAPI.connected) {
-        socketAPI.emit("send", messagePacket);
-        setInputMessage("");
-        setMessages((prev) => [
-          ...prev,
-          { ...messagePacket, createdAt: timestamp, updatedAt: timestamp },
-        ]);
-      } else {
+      if (!socketAPI.connected) {
         toast.error("Socket disconnected. Please refresh and try again.");
+        return;
       }
+
+      socketAPI.emit("send", messagePacket);
+
+      setInputMessage("");
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          ...messagePacket,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        },
+      ]);
     } catch (error) {
       console.log(error);
-      toast.error(error?.response?.data?.message || "Message Sending Failed");
+      toast.error(
+        error?.response?.data?.message || "Message Sending Failed"
+      );
     }
   };
 
@@ -78,23 +93,35 @@ const ChatWindow = ({ receiver }) => {
 
     try {
       const res = await api.get(`/user/fetchMessages/${receiverId}`);
-      setMessages(res.data.data);
+      setMessages(res.data.data || []);
     } catch (error) {
       console.log(error);
-      toast.error(error?.response?.data?.message || "Error Fetching Messages");
+
+      toast.error(
+        error?.response?.data?.message || "Error Fetching Messages"
+      );
     }
   };
 
   const handleReceiveMessage = (newMessagePack) => {
-    setMessages((prev) => [...prev, newMessagePack]);
+    const isCurrentChat =
+      (newMessagePack.senderId === receiverId &&
+        newMessagePack.receiverId === senderId) ||
+      (newMessagePack.senderId === senderId &&
+        newMessagePack.receiverId === receiverId);
+
+    if (isCurrentChat) {
+      setMessages((prev) => [...prev, newMessagePack]);
+    }
   };
 
   useEffect(() => {
     setMessages([]);
-    if (receiver) {
+
+    if (receiverId) {
       fetchAllOldMessage();
     }
-  }, [receiver]);
+  }, [receiverId]);
 
   useEffect(() => {
     socketAPI.on("receive", handleReceiveMessage);
@@ -102,21 +129,28 @@ const ChatWindow = ({ receiver }) => {
     return () => {
       socketAPI.off("receive", handleReceiveMessage);
     };
-  }, [receiverId]);
+  }, [receiverId, senderId]);
 
-  // close emoji picker on outside click
+  // Close emoji picker when clicking outside
   useEffect(() => {
-    const handleClickOutside = () => setShowEmoji(false);
+    const handleClickOutside = () => {
+      setShowEmoji(false);
+    };
+
     document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
   }, []);
 
   const handleFileClick = () => {
-    fileRef.current.click();
+    fileRef.current?.click();
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
+
     if (file) {
       toast.success(`File selected: ${file.name}`);
     }
@@ -124,69 +158,110 @@ const ChatWindow = ({ receiver }) => {
 
   if (!receiver) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-100">
-        <p className="text-gray-500">Select a contact to start chatting</p>
+      <div className="flex h-full items-center justify-center bg-base-200">
+        <div className="text-center">
+          <p className="text-lg font-semibold text-base-content/70">
+            Select a contact to start chatting
+          </p>
+
+          <p className="mt-1 text-sm text-base-content/50">
+            Choose someone from your contacts.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col bg-gray-100 rounded-xl shadow-md relative">
-      
-      {/* Header */}
-      <div className="flex items-center gap-3 p-4 bg-white border-b rounded-t-xl">
-        <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center font-bold text-gray-700">
-          {receiver.fullName?.charAt(0)}
+    <div className="relative flex h-full flex-col bg-base-200">
+
+      {/* HEADER */}
+      <div className="flex items-center gap-3 border-b border-base-300 bg-base-100 px-3 py-3 shadow-sm">
+
+        {/* Mobile Back Button */}
+        <button
+          type="button"
+          onClick={onBack}
+          className="btn btn-ghost btn-circle md:hidden"
+          aria-label="Back to contacts"
+        >
+          <IoArrowBack className="text-xl" />
+        </button>
+
+        {/* Avatar */}
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-primary-content">
+          {receiver.fullName
+            ?.split(" ")
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((word) => word[0])
+            .join("")
+            .toUpperCase()}
         </div>
-        <div>
-          <h2 className="font-semibold text-gray-800">{receiver.fullName}</h2>
-          <p className="text-xs text-gray-500">Active chat</p>
+
+        {/* User Info */}
+        <div className="min-w-0">
+          <h2 className="truncate font-semibold text-base-content">
+            {receiver.fullName}
+          </h2>
+
+          <p className="text-xs text-success">
+            Active chat
+          </p>
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      {/* MESSAGES */}
+      <div className="flex-1 space-y-3 overflow-y-auto p-4">
+
         {messages.length > 0 ? (
-          messages.map((chat, idx) => (
-            <div
-              key={idx}
-              className={`flex ${
-                chat.senderId === receiverId
-                  ? "justify-start"
-                  : "justify-end"
-              }`}
-            >
-              <div>
-                <p className="text-xs text-gray-500 mb-1">
-                  {chat.senderId === receiverId
-                    ? receiver.fullName
-                    : user.fullName}
-                </p>
+          messages.map((chat, idx) => {
+            const isReceived = chat.senderId === receiverId;
+
+            return (
+              <div
+                key={chat._id || idx}
+                className={`flex ${
+                  isReceived ? "justify-start" : "justify-end"
+                }`}
+              >
                 <div
-                  className={`px-4 py-2 rounded-2xl max-w-xs wrap-break-word shadow-sm ${
-                    chat.senderId === receiverId
-                      ? "bg-white text-gray-800"
-                      : "bg-blue-500 text-white"
+                  className={`max-w-[80%] md:max-w-xs ${
+                    isReceived ? "items-start" : "items-end"
                   }`}
                 >
-                  {chat.message}
+                  <p className="mb-1 text-xs text-base-content/50">
+                    {isReceived ? receiver.fullName : user?.fullName}
+                  </p>
+
+                  <div
+                    className={`wrap-break-word rounded-2xl px-4 py-2 shadow-sm ${
+                      isReceived
+                        ? "rounded-tl-sm bg-base-100 text-base-content"
+                        : "rounded-tr-sm bg-primary text-primary-content"
+                    }`}
+                  >
+                    {chat.message}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         ) : (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-gray-400">Loading chats...</p>
+          <div className="flex h-full items-center justify-center">
+            <p className="text-sm text-base-content/50">
+              No messages yet. Start the conversation!
+            </p>
           </div>
         )}
 
         <div ref={bottomRef} />
       </div>
 
-      {/* Emoji Picker */}
+      {/* EMOJI PICKER */}
       {showEmoji && (
         <div
-          className="absolute bottom-20 left-4 z-50"
+          className="absolute bottom-20 left-3 z-50"
           onClick={(e) => e.stopPropagation()}
         >
           <EmojiPicker
@@ -200,23 +275,30 @@ const ChatWindow = ({ receiver }) => {
         </div>
       )}
 
-      {/* Input */}
-      <div className="p-3 bg-white border-t flex gap-2 items-center">
-        
-        {/* Emoji Button */}
+      {/* MESSAGE INPUT */}
+      <div className="flex items-center gap-2 border-t border-base-300 bg-base-100 p-3">
+
+        {/* Emoji */}
         <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
-            setShowEmoji(!showEmoji);
+            setShowEmoji((prev) => !prev);
           }}
-          className="text-xl"
+          className="btn btn-ghost btn-circle"
+          aria-label="Add emoji"
         >
-          <FaSmile />
+          <FaSmile className="text-lg" />
         </button>
 
-        {/* File Button */}
-        <button onClick={handleFileClick} className="text-xl">
-          <FaPaperclip />
+        {/* Attachment */}
+        <button
+          type="button"
+          onClick={handleFileClick}
+          className="btn btn-ghost btn-circle"
+          aria-label="Attach file"
+        >
+          <FaPaperclip className="text-lg" />
         </button>
 
         <input
@@ -226,32 +308,35 @@ const ChatWindow = ({ receiver }) => {
           onChange={handleFileChange}
         />
 
-        {/* Text Input */}
+        {/* Input */}
         <input
           type="text"
           value={inputMessage}
-          placeholder="Type your message..."
-          className="flex-1 border rounded-full px-4 py-2 outline-none focus:ring-2 focus:ring-blue-400"
+          placeholder="Type a message..."
+          className="input input-bordered min-w-0 flex-1 rounded-full"
           onChange={(e) => setInputMessage(e.target.value)}
           onKeyDown={handleKeyDown}
         />
 
-        {/* Send Button */}
+        {/* Send */}
         <button
-          className="bg-blue-500 text-white px-5 py-2 rounded-full hover:bg-blue-600 disabled:opacity-50"
+          type="button"
           onClick={handleSend}
-          disabled={inputMessage === ""}
+          disabled={!inputMessage.trim()}
+          className="btn btn-primary rounded-full"
         >
           Send
         </button>
       </div>
 
-      {/* Footer */}
-      <div className="text-center text-xs text-gray-400 py-2">
-        Powered by <span className="font-semibold">ChatAppFSD45</span>
+      {/* FOOTER */}
+      <div className="bg-base-100 py-1 text-center text-xs text-base-content/40">
+        Powered by <span className="font-semibold">DostiHUB</span>
       </div>
     </div>
   );
 };
 
 export default ChatWindow;
+
+
