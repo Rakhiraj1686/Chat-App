@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import api from "../config/api";
@@ -5,41 +6,48 @@ import { Link, useNavigate } from "react-router-dom";
 import { useGoogleAuth } from "../config/GoogleAuth.jsx";
 import { FcGoogle } from "react-icons/fc";
 import { useAuth } from "../context/AuthContext";
-import { MdLock, MdMail, MdOutlineArrowOutward } from "react-icons/md";
+import {
+  MdLock,
+  MdMail,
+  MdOutlineArrowOutward,
+  MdVisibility,
+  MdVisibilityOff,
+} from "react-icons/md";
 import { RiChatSmile3Line } from "react-icons/ri";
 
 const Login = () => {
   const { setUser } = useAuth();
   const navigate = useNavigate();
 
-  const { isLoading, error, isInitialized, signInWithGoogle } = useGoogleAuth();
+  const {
+    isLoading: googleLoading,
+    error,
+    isInitialized,
+    signInWithGoogle,
+  } = useGoogleAuth();
 
-  const handleGoogleSuccess = async (userData) => {
-    console.log("Google Login Data", userData);
-    setLoading(true);
-    try {
-      const res = await api.post("/auth/googleLogin", userData);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
-      toast.success(res.data.message);
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-      // optional: store user or token
-      setUser(res.data.data);
-      sessionStorage.setItem("AppUser", JSON.stringify(res.data.data));
+  const handleChange = (e) => {
+    const { name, value } = e.target;
 
-      handleClearForm();
-
-      // simple redirect
-      navigate("/chatting");
-    } catch (error) {
-      console.log(error);
-      toast.error(error?.response?.data?.message || "Login failed");
-    } finally {
-      setLoading(false);
-    }
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const GoogleLogin = () => {
-    signInWithGoogle(handleGoogleSuccess, handleGoogleFailure);
+  const handleClearForm = () => {
+    setFormData({
+      email: "",
+      password: "",
+    });
   };
 
   const handleGoogleFailure = (error) => {
@@ -47,223 +55,381 @@ const Login = () => {
     toast.error("Google login failed. Please try again.");
   };
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const handleGoogleSuccess = async (userData) => {
+    setLoading(true);
 
-  const [Loading, setLoading] = useState(false);
+    try {
+      const res = await api.post("/auth/googleLogin", userData);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+      toast.success(res.data.message);
+
+      setUser(res.data.data);
+      sessionStorage.setItem(
+        "AppUser",
+        JSON.stringify(res.data.data)
+      );
+
+      navigate("/chatting");
+    } catch (error) {
+      console.error(error);
+
+      toast.error(
+        error?.response?.data?.message || "Login failed"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleClearForm = () => {
-    setFormData({ email: "", password: "" });
+  const handleGoogleLogin = () => {
+    signInWithGoogle(
+      handleGoogleSuccess,
+      handleGoogleFailure
+    );
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setLoading(true);
 
     try {
-      const res = await api.post("/auth/login", formData);
+      const res = await api.post(
+        "/auth/login",
+        formData
+      );
 
       toast.success(res.data.message);
 
-      // optional: store user or token
       setUser(res.data.data);
-      sessionStorage.setItem("AppUser", JSON.stringify(res.data.data));
+
+      sessionStorage.setItem(
+        "AppUser",
+        JSON.stringify(res.data.data)
+      );
 
       handleClearForm();
 
-      // simple redirect
       navigate("/chatting");
     } catch (error) {
-      console.log(error);
-      toast.error(error?.response?.data?.message || "Login failed");
+      console.error(error);
+
+      toast.error(
+        error?.response?.data?.message || "Login failed"
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-base-200 px-4 py-10 sm:px-6 lg:px-8">
-      <div className="absolute left-0 top-0 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
-      <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-secondary/20 blur-3xl" />
+    <main className="relative min-h-screen overflow-hidden bg-base-200">
 
-      <div className="relative mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl items-center gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="hidden rounded-4xl border border-base-300/60 bg-base-100/80 p-8 shadow-2xl backdrop-blur lg:block xl:p-10">
-          <div className="flex h-full flex-col justify-between gap-10">
-            <div>
-              <div className="inline-flex items-center gap-3 rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
-                <RiChatSmile3Line className="text-lg" />
-                DostiHUB Login Space
+      {/* Background */}
+      <div className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
+
+      <div className="pointer-events-none absolute bottom-0 right-0 h-80 w-80 rounded-full bg-secondary/15 blur-3xl" />
+
+      <div className="relative mx-auto grid min-h-screen max-w-7xl items-center gap-10 px-4 py-8 sm:px-6 lg:grid-cols-2 lg:px-10">
+
+        {/* ================= BRAND SIDE ================= */}
+        <section className="hidden lg:block">
+
+          <div className="max-w-xl">
+
+            {/* Logo */}
+            <Link
+              to="/"
+              className="inline-flex items-center gap-3"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-xl font-black text-primary-content shadow-lg">
+                D
               </div>
 
-              <h1 className="mt-6 max-w-md text-5xl font-black leading-tight text-base-content">
-                Continue your chats without losing the flow.
-              </h1>
+              <div>
+                <h1 className="text-2xl font-black">
+                  Dosti<span className="text-primary">Hub</span>
+                </h1>
 
-              <p className="mt-5 max-w-lg text-base leading-7 text-base-content/70">
-                Fast login, clean access, and the same account logic you already use.
-                Bas UI ko fresh look diya gaya hai.
-              </p>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-3xl bg-base-200 p-5">
-                <p className="text-sm font-semibold text-base-content">Secure access</p>
-                <p className="mt-2 text-sm leading-6 text-base-content/70">
-                  Session save hoga aur login ke baad direct chatting page par redirect milega.
+                <p className="text-xs text-base-content/50">
+                  Connect. Chat. Belong.
                 </p>
               </div>
+            </Link>
 
-              <div className="rounded-3xl bg-primary p-5 text-primary-content">
-                <p className="text-sm font-semibold">Quick entry</p>
-                <p className="mt-2 text-sm leading-6 text-primary-content/80">
-                  Email-password ya Google, dono options same backend logic ke saath available hain.
-                </p>
+            {/* Heading */}
+            <h2 className="mt-16 text-5xl font-black leading-tight xl:text-6xl">
+              Welcome back.
+              <span className="block text-primary">
+                Your conversations are waiting.
+              </span>
+            </h2>
+
+            <p className="mt-6 max-w-lg text-lg leading-8 text-base-content/65">
+              Sign in to continue your conversations, connect with your
+              people, and stay close to the moments that matter.
+            </p>
+
+            {/* Chat Preview */}
+            <div className="mt-10 max-w-md rounded-3xl border border-base-300 bg-base-100 p-4 shadow-xl">
+
+              <div className="flex items-center gap-3 border-b border-base-300 pb-4">
+
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-content">
+                  <RiChatSmile3Line size={20} />
+                </div>
+
+                <div>
+                  <p className="font-bold">
+                    DostiHub Chat
+                  </p>
+
+                  <p className="text-xs text-success">
+                    ● Everything is ready
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3 py-4 text-sm">
+
+                <div className="w-fit rounded-2xl rounded-tl-sm bg-base-200 px-4 py-3">
+                  Hey! Good to see you again 👋
+                </div>
+
+                <div className="ml-auto w-fit rounded-2xl rounded-tr-sm bg-primary px-4 py-3 text-primary-content">
+                  Let's catch up ✨
+                </div>
+
               </div>
             </div>
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-xl rounded-4xl border border-base-300/60 bg-base-100/90 p-6 shadow-2xl backdrop-blur sm:p-8">
-          <div className="mb-8 flex items-start justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary/80">
+        {/* ================= LOGIN CARD ================= */}
+        <section className="mx-auto w-full max-w-md">
+
+          {/* Mobile Logo */}
+          <div className="mb-8 flex justify-center lg:hidden">
+
+            <Link
+              to="/"
+              className="flex items-center gap-3"
+            >
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-lg font-black text-primary-content">
+                D
+              </div>
+
+              <h1 className="text-2xl font-black">
+                Dosti<span className="text-primary">HUB</span>
+              </h1>
+            </Link>
+
+          </div>
+
+          <div className="rounded-3xl border border-base-300 bg-base-100 p-6 shadow-2xl sm:p-8">
+
+            {/* Header */}
+            <div className="mb-8">
+
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
                 Welcome Back
               </p>
-              <h2 className="mt-2 text-4xl font-black text-base-content">
-                Login
+
+              <h2 className="mt-2 text-3xl font-black">
+                Sign in to DostiHub
               </h2>
-              <p className="mt-3 max-w-sm text-sm leading-6 text-base-content/70">
-                Apne account me sign in karke chats aur contacts ko continue karo.
+
+              <p className="mt-3 text-sm leading-6 text-base-content/60">
+                Continue where you left off and get back to your conversations.
               </p>
+
             </div>
 
-            <div className="hidden rounded-2xl bg-base-200 p-4 sm:block">
-              <RiChatSmile3Line className="text-3xl text-primary" />
-            </div>
-          </div>
+            {/* Form */}
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-5"
+            >
 
-          <form
-            onSubmit={handleSubmit}
-            onReset={handleClearForm}
-            className="space-y-5"
-          >
-            <label className="block">
-              <span className="mb-2 block text-sm font-semibold text-base-content">
-                Email Address
-              </span>
-              <div className="flex items-center gap-3 rounded-2xl border border-base-300 bg-base-200 px-4 focus-within:border-primary">
-                <MdMail className="text-xl text-base-content/50" />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="name@email.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  disabled={Loading}
-                  required
-                  className="input h-14 w-full border-none bg-transparent px-0 shadow-none focus:outline-none"
-                />
-              </div>
-            </label>
+              {/* Email */}
+              <label className="block">
 
-            <label className="block">
-              <span className="mb-2 block text-sm font-semibold text-base-content">
-                Password
-              </span>
-              <div className="flex items-center gap-3 rounded-2xl border border-base-300 bg-base-200 px-4 focus-within:border-primary">
-                <MdLock className="text-xl text-base-content/50" />
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="Enter your password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  disabled={Loading}
-                  required
-                  className="input h-14 w-full border-none bg-transparent px-0 shadow-none focus:outline-none"
-                />
-              </div>
-            </label>
+                <span className="mb-2 block text-sm font-semibold">
+                  Email address
+                </span>
 
-            <div className="grid gap-3 pt-2 sm:grid-cols-2">
-              <button
-                type="reset"
-                disabled={Loading}
-                className="btn btn-outline h-13 rounded-2xl"
-              >
-                Clear Form
-              </button>
+                <div className="flex items-center gap-3 rounded-2xl border border-base-300 bg-base-200 px-4 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10">
 
+                  <MdMail className="text-xl text-base-content/40" />
+
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="you@example.com"
+                    disabled={loading}
+                    required
+                    className="input h-14 w-full border-none bg-transparent px-0 shadow-none focus:outline-none"
+                  />
+
+                </div>
+
+              </label>
+
+              {/* Password */}
+              <label className="block">
+
+                <div className="mb-2 flex items-center justify-between">
+
+                  <span className="text-sm font-semibold">
+                    Password
+                  </span>
+
+                  <button
+                    type="button"
+                    className="text-xs font-semibold text-primary hover:underline"
+                  >
+                    Forgot password?
+                  </button>
+
+                </div>
+
+                <div className="flex items-center gap-3 rounded-2xl border border-base-300 bg-base-200 px-4 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10">
+
+                  <MdLock className="text-xl text-base-content/40" />
+
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Enter your password"
+                    disabled={loading}
+                    required
+                    className="input h-14 w-full border-none bg-transparent px-0 shadow-none focus:outline-none"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowPassword((prev) => !prev)
+                    }
+                    className="text-xl text-base-content/40 transition hover:text-primary"
+                    aria-label={
+                      showPassword
+                        ? "Hide password"
+                        : "Show password"
+                    }
+                  >
+                    {showPassword ? (
+                      <MdVisibilityOff />
+                    ) : (
+                      <MdVisibility />
+                    )}
+                  </button>
+
+                </div>
+
+              </label>
+
+              {/* Submit */}
               <button
                 type="submit"
-                disabled={Loading}
-                className="btn btn-primary h-13 rounded-2xl"
+                disabled={loading}
+                className="btn btn-primary h-14 w-full rounded-2xl text-base font-bold"
               >
-                {Loading ? "Logging in..." : "Login Now"}
+                {loading
+                  ? "Signing in..."
+                  : "Sign In"}
               </button>
+
+            </form>
+
+            {/* Divider */}
+            <div className="my-6 flex items-center gap-3">
+
+              <div className="h-px flex-1 bg-base-300" />
+
+              <span className="text-xs font-semibold uppercase tracking-widest text-base-content/40">
+                or
+              </span>
+
+              <div className="h-px flex-1 bg-base-300" />
+
             </div>
-          </form>
 
-          <div className="my-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-base-300" />
-            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-base-content/50">
-              or continue with
-            </span>
-            <div className="h-px flex-1 bg-base-300" />
-          </div>
-
-          <div>
+            {/* Google */}
             {error ? (
+
               <button
-                className="btn btn-outline btn-error h-14 w-full rounded-2xl font-sans"
                 disabled
+                className="btn btn-outline btn-error h-14 w-full rounded-2xl"
               >
-                <FcGoogle className="text-xl" />
+                <FcGoogle size={21} />
                 {error}
               </button>
+
             ) : (
+
               <button
-                onClick={GoogleLogin}
-                className="btn h-14 w-full rounded-2xl border border-base-300 bg-base-100 font-sans shadow-none hover:border-primary hover:bg-base-200"
-                disabled={!isInitialized || isLoading}
+                onClick={handleGoogleLogin}
+                disabled={
+                  !isInitialized ||
+                  googleLoading ||
+                  loading
+                }
+                className="btn h-14 w-full rounded-2xl border border-base-300 bg-base-100 shadow-none transition hover:border-primary hover:bg-base-200"
               >
-                <FcGoogle className="text-xl" />
-                {isLoading
-                  ? "Loading..."
+                <FcGoogle size={21} />
+
+                {googleLoading
+                  ? "Connecting..."
                   : isInitialized
                     ? "Continue with Google"
-                    : "Google Auth Error"}
+                    : "Google unavailable"}
               </button>
-            )}
-          </div>
 
-          <div className="mt-8 flex flex-col gap-4 rounded-3xl bg-base-200 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-base-content">New here?</p>
-              <p className="text-sm text-base-content/70">
-                Account create karke DostiHUB join karo.
-              </p>
+            )}
+
+            {/* Register */}
+            <div className="mt-7 rounded-2xl bg-base-200 p-4">
+
+              <div className="flex items-center justify-between gap-4">
+
+                <div>
+                  <p className="text-sm font-semibold">
+                    New to DostiHub?
+                  </p>
+
+                  <p className="mt-1 text-xs text-base-content/60">
+                    Create your account and start connecting.
+                  </p>
+                </div>
+
+                <Link
+                  to="/register"
+                  className="btn btn-primary btn-sm rounded-xl"
+                >
+                  Register
+                  <MdOutlineArrowOutward />
+                </Link>
+
+              </div>
+
             </div>
 
-            <Link to="/register" className="btn btn-primary btn-soft rounded-2xl">
-              Create Account <MdOutlineArrowOutward className="text-lg" />
-            </Link>
-          </div>
+            <p className="mt-6 text-center text-xs text-base-content/45">
+              Your account and conversations are protected.
+            </p>
 
-          <p className="mt-6 text-center text-sm text-base-content/60">
-            Your data is safe with us.
-          </p>
+          </div>
         </section>
+
       </div>
-    </div>
+    </main>
   );
 };
 
 export default Login;
+

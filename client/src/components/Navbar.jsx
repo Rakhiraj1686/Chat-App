@@ -1,71 +1,80 @@
 import React, { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Menu, X } from "lucide-react";
 
 const Navbar = () => {
   const [theme, setTheme] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const navigate = useNavigate();
-  const location = useLocation();
 
   const handleThemeChange = (event) => {
     const selectedTheme = event.target.value;
+
     setTheme(selectedTheme);
     localStorage.setItem("chatKroTheme", selectedTheme);
-    document.documentElement.setAttribute("data-theme", selectedTheme);
+
+    if (selectedTheme) {
+      document.documentElement.setAttribute(
+        "data-theme",
+        selectedTheme
+      );
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+    }
   };
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("chatKroTheme");
-    document.documentElement.setAttribute("data-theme", savedTheme);
+    const savedTheme = localStorage.getItem("chatKroTheme") || "";
+
     setTheme(savedTheme);
+
+    if (savedTheme) {
+      document.documentElement.setAttribute(
+        "data-theme",
+        savedTheme
+      );
+    }
   }, []);
 
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [location.pathname]);
-
-  const navLinks = [
-    { label: "Home", path: "/" },
-    { label: "About", path: "/about" },
-    { label: "Contact", path: "/contact" },
-    
-  ];
-
   return (
-    <header className="sticky top-0 z-40 border-b border-base-300 bg-primary text-primary-content shadow-md">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6">
-        <div>
-          <h1 className="text-2xl font-black leading-none sm:text-3xl">
-            Dosti<span className="text-accent">HUB</span>
-          </h1>
-          <p className="mt-0.5 text-xs text-primary-content/70 sm:text-sm">
-            Connect with friends instantly
-          </p>
-        </div>
+    <header className="sticky top-0 z-50 border-b border-base-300/70 bg-base-100/85 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-8">
 
-        <nav className="hidden items-center gap-5 text-sm font-medium md:flex lg:text-base">
-          {navLinks.map((link) => (
-            <Link key={link.path} to={link.path} className="transition hover:text-accent">
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        {/* ================= LOGO ================= */}
+        <Link
+          to="/"
+          aria-label="DostiHub Home"
+          className="group flex items-center gap-2"
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-lg font-black text-primary-content shadow-sm transition duration-300 group-hover:scale-105">
+            D
+          </div>
 
-        <div className="hidden items-center gap-2 md:flex lg:gap-3">
-          <button className="btn btn-secondary btn-sm lg:btn-md" onClick={() => navigate("/login")}>
-            Login
-          </button>
-          <button className="btn btn-secondary btn-sm lg:btn-md" onClick={() => navigate("/register")}>
-            Register
-          </button>
+          <div className="leading-none">
+            <h1 className="text-xl font-black tracking-tight md:text-2xl">
+              Dosti<span className="text-primary">Hub</span>
+            </h1>
+
+            <p className="mt-1 hidden text-[10px] font-medium text-base-content/50 sm:block">
+              Connect. Chat. Belong.
+            </p>
+          </div>
+        </Link>
+
+        {/* ================= DESKTOP ACTIONS ================= */}
+        <div className="hidden items-center gap-2 md:flex">
+
+          {/* Theme Selector */}
           <select
-            name="theme"
             id="theme-desktop"
-            className="select select-bordered select-sm w-28 bg-base-100 text-base-content lg:w-32"
-            onChange={handleThemeChange}
+            name="theme"
             value={theme}
+            onChange={handleThemeChange}
+            className="select select-bordered select-sm w-28 bg-base-100 text-xs"
+            aria-label="Select theme"
           >
-            <option value="">Default</option>
+            <option value="">Theme</option>
             <option value="light">Light</option>
             <option value="dark">Dark</option>
             <option value="claude">Claude</option>
@@ -84,43 +93,92 @@ const Navbar = () => {
             <option value="soft">Soft</option>
             <option value="valorant">Valorant</option>
           </select>
+
+          {/* Login */}
+          <button
+            type="button"
+            onClick={() => navigate("/login")}
+            className="btn btn-ghost btn-sm px-4"
+          >
+            Login
+          </button>
+
+          {/* Register */}
+          <button
+            type="button"
+            onClick={() => navigate("/register")}
+            className="btn btn-primary btn-sm rounded-xl px-5"
+          >
+            Get Started
+          </button>
         </div>
 
+        {/* ================= MOBILE MENU BUTTON ================= */}
         <button
           type="button"
-          className="btn btn-ghost btn-circle text-primary-content md:hidden"
-          aria-label="Open menu"
+          className="btn btn-ghost btn-square md:hidden"
+          aria-label={
+            isMobileMenuOpen ? "Close menu" : "Open menu"
+          }
           aria-expanded={isMobileMenuOpen}
-          onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+          onClick={() =>
+            setIsMobileMenuOpen((prev) => !prev)
+          }
         >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-6 w-6 stroke-current">
-              {isMobileMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 6l12 12M18 6L6 18" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
-          </button>
+          {isMobileMenuOpen ? (
+            <X size={22} />
+          ) : (
+            <Menu size={22} />
+          )}
+        </button>
       </div>
 
+      {/* ================= MOBILE MENU ================= */}
       {isMobileMenuOpen && (
-        <div className="border-t border-primary-content/20 bg-primary px-4 pb-4 pt-3 text-primary-content md:hidden">
-          <div className="mx-auto w-full max-w-7xl rounded-xl border border-base-300 bg-base-100 p-3 text-base-content shadow-xl">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-primary">Menu</p>
+        <div className="border-t border-base-300 bg-base-100 px-4 pb-4 pt-3 md:hidden">
+          <div className="mx-auto max-w-7xl space-y-3">
 
-            <div className="space-y-1">
-              {navLinks.map((link) => (
-                <Link key={link.path} to={link.path} className="rounded-lg px-3 py-2 hover:bg-base-200">
-                  {link.label}
-                </Link>
-              ))}
+            {/* Theme */}
+            <div>
+              <label
+                htmlFor="theme-mobile"
+                className="mb-2 block text-xs font-semibold uppercase tracking-wider text-base-content/50"
+              >
+                Appearance
+              </label>
+
+              <select
+                id="theme-mobile"
+                name="theme"
+                value={theme}
+                onChange={handleThemeChange}
+                className="select select-bordered w-full"
+              >
+                <option value="">Default Theme</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="claude">Claude</option>
+                <option value="spotify">Spotify</option>
+                <option value="vscode">VSCode</option>
+                <option value="black">Black</option>
+                <option value="corporate">Corporate</option>
+                <option value="ghibli">Ghibli</option>
+                <option value="gourmet">Gourmet</option>
+                <option value="luxury">Luxury</option>
+                <option value="mintlify">Mintlify</option>
+                <option value="pastel">Pastel</option>
+                <option value="perplexity">Perplexity</option>
+                <option value="shadcn">Shadcn</option>
+                <option value="slack">Slack</option>
+                <option value="soft">Soft</option>
+                <option value="valorant">Valorant</option>
+              </select>
             </div>
 
-            <div className="my-3 h-px bg-base-300" />
-
-            <div className="grid grid-cols-2 gap-2">
+            {/* Auth Actions */}
+            <div className="grid grid-cols-2 gap-2 border-t border-base-300 pt-3">
               <button
-                className="btn btn-secondary btn-sm"
+                className="btn btn-outline"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   navigate("/login");
@@ -128,46 +186,17 @@ const Navbar = () => {
               >
                 Login
               </button>
+
               <button
-                className="btn btn-secondary btn-sm"
+                className="btn btn-primary"
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   navigate("/register");
                 }}
               >
-                Register
+                Get Started
               </button>
             </div>
-
-            <label className="mt-3 block text-xs font-medium text-base-content/70" htmlFor="theme-mobile">
-              Theme
-            </label>
-            <select
-              name="theme"
-              id="theme-mobile"
-              className="select select-bordered select-sm mt-1 w-full"
-              onChange={handleThemeChange}
-              value={theme}
-            >
-              <option value="">Default</option>
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-              <option value="claude">Claude</option>
-              <option value="spotify">Spotify</option>
-              <option value="vscode">VSCode</option>
-              <option value="black">Black</option>
-              <option value="corporate">Corporate</option>
-              <option value="ghibli">Ghibli</option>
-              <option value="gourmet">Gourmet</option>
-              <option value="luxury">Luxury</option>
-              <option value="mintlify">Mintlify</option>
-              <option value="pastel">Pastel</option>
-              <option value="perplexity">Perplexity</option>
-              <option value="shadcn">Shadcn</option>
-              <option value="slack">Slack</option>
-              <option value="soft">Soft</option>
-              <option value="valorant">Valorant</option>
-            </select>
           </div>
         </div>
       )}
