@@ -72,7 +72,7 @@ const Chating = () => {
       <div className="flex h-full overflow-hidden rounded-box border border-base-300 bg-base-100 shadow-sm">
 
         {/* ================= DESKTOP NAVIGATION ================= */}
-        <div className="hidden w-[5%] min-w-[60px] overflow-hidden border-r border-base-300 md:block">
+        <div className="hidden w-[5%] min-w-15 overflow-hidden border-r border-base-300 md:block">
           <QuickNevigation
             setFetchMode={setFetchMode}
             fetchMode={fetchMode}
@@ -109,7 +109,7 @@ const Chating = () => {
             </div>
 
             {/* ================= DESKTOP CONTACT BAR ================= */}
-            <div className="hidden w-[20%] min-w-[240px] overflow-hidden border-r border-base-300 md:block">
+            <div className="hidden w-[20%] min-w-60 overflow-hidden border-r border-base-300 md:block">
               <ContactBar
                 fetchMode={fetchMode}
                 setReceiver={handleSelectContact}
