@@ -79,10 +79,13 @@ export const UserLogin = async (req, res, next) => {
 
     // Generate token and set cookie
     generateToken(existingUser._id, res);
-    
+
+    const safeUser = existingUser.toObject();
+    delete safeUser.password;
+
     res.status(200).json({
       message: "Login successful",
-      data: existingUser,
+      data: safeUser,
     });
   } catch (error) {
     next(error);
@@ -107,9 +110,12 @@ export const GoogleUserLogin = async (req, res, next) => {
 
     generateToken(existingUser._id, res);
 
+    const safeUser = existingUser.toObject();
+    delete safeUser.password;
+
     res.status(200).json({
       message: "Login successful",
-      data: existingUser,
+      data: safeUser,
     });
   } catch (error) {
     next(error);

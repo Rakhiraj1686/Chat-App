@@ -6,6 +6,37 @@ import Settings from "../components/chats/Settings";
 import { useAuth } from "../context/AuthContext";
 import socketAPI from "../config/WebSocket.jsx";
 import { useNavigate } from "react-router-dom";
+import { TiMessages } from "react-icons/ti";
+import { MdOutlineChat, MdPerson } from "react-icons/md";
+
+const MobileTabBar = ({ fetchMode, setFetchMode, onProfile }) => {
+  const tabs = [
+    { key: "RC", label: "Chats", icon: TiMessages, onClick: () => setFetchMode("RC") },
+    { key: "AC", label: "Contacts", icon: MdOutlineChat, onClick: () => setFetchMode("AC") },
+    { key: "profile", label: "Profile", icon: MdPerson, onClick: onProfile },
+  ];
+
+  return (
+    <nav className="flex shrink-0 border-t border-base-300 bg-base-100 md:hidden">
+      {tabs.map((tab) => {
+        const active = fetchMode === tab.key;
+        return (
+          <button
+            key={tab.key}
+            type="button"
+            onClick={tab.onClick}
+            className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-xs font-medium transition-colors ${
+              active ? "text-primary" : "text-base-content/50"
+            }`}
+          >
+            <tab.icon size={20} />
+            {tab.label}
+          </button>
+        );
+      })}
+    </nav>
+  );
+};
 
 const Chating = () => {
   const { user } = useAuth();
@@ -38,7 +69,7 @@ const Chating = () => {
 
   return (
     <div className="h-screen overflow-hidden bg-base-200 p-1 sm:p-2">
-      <div className="flex h-full overflow-hidden rounded-xl border border-base-300 bg-base-100 shadow-sm">
+      <div className="flex h-full overflow-hidden rounded-box border border-base-300 bg-base-100 shadow-sm">
 
         {/* ================= DESKTOP NAVIGATION ================= */}
         <div className="hidden w-[5%] min-w-[60px] overflow-hidden border-r border-base-300 md:block">
@@ -46,6 +77,7 @@ const Chating = () => {
             setFetchMode={setFetchMode}
             fetchMode={fetchMode}
             setActivePage={setActivePage}
+            activePage={activePage}
           />
         </div>
 
@@ -58,14 +90,21 @@ const Chating = () => {
           <>
             {/* ================= MOBILE CONTACT BAR ================= */}
             <div
-              className={`h-full w-full overflow-hidden md:hidden ${
-                receiver ? "hidden" : "block"
+              className={`flex h-full w-full flex-col overflow-hidden md:hidden ${
+                receiver ? "hidden" : "flex"
               }`}
             >
-              <ContactBar
+              <div className="min-h-0 flex-1 overflow-hidden">
+                <ContactBar
+                  fetchMode={fetchMode}
+                  setReceiver={handleSelectContact}
+                  setActivePage={setActivePage}
+                />
+              </div>
+              <MobileTabBar
                 fetchMode={fetchMode}
-                setReceiver={handleSelectContact}
-                setActivePage={setActivePage}
+                setFetchMode={setFetchMode}
+                onProfile={() => navigate("/userDashboard")}
               />
             </div>
 

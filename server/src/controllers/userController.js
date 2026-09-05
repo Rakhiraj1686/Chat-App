@@ -11,12 +11,48 @@ export const getAllUsers = async (req, res, next) => {
       return next(error);
     }
 
-    const users = await User.find();
+    const users = await User.find().select("-password");
 
     const filteredUsers = users.filter(
       (user) => user._id.toString() !== currentUser._id.toString(),
     );
     res.status(200).json({ data: filteredUsers });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Safe, public-facing profile for a single user (e.g. the person you're
+// chatting with). Deliberately separate from getAllUsers/getRecentUsers so
+// the set of exposed fields is controlled in exactly one place.
+export const getUserProfile = async (req, res, next) => {
+  try {
+    const currentUser = req.user;
+    if (!currentUser) {
+      const error = new Error("Unauthorized");
+      error.statusCode = 401;
+      return next(error);
+    }
+
+    const { userId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      const error = new Error("Invalid user id");
+      error.statusCode = 400;
+      return next(error);
+    }
+
+    const user = await User.findById(userId).select(
+      "fullName email mobileNumber about createdAt",
+    );
+
+    if (!user) {
+      const error = new Error("User not found");
+      error.statusCode = 404;
+      return next(error);
+    }
+
+    res.status(200).json({ data: user });
   } catch (error) {
     next(error);
   }
@@ -31,7 +67,7 @@ export const updateProfile = async (req, res, next) => {
       return next(error);
     }
 
-    const { fullName, email, mobileNumber } = req.body;
+    const { fullName, email, mobileNumber, about } = req.body;
 
     // Check if email is already taken by another user
     if (email) {
@@ -52,6 +88,7 @@ export const updateProfile = async (req, res, next) => {
         ...(fullName && { fullName }),
         ...(email && { email }),
         ...(mobileNumber !== undefined && { mobileNumber }),
+        ...(about !== undefined && { about }),
       },
       { new: true },
     ).select("-password");

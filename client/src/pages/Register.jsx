@@ -1,19 +1,19 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import api from "../config/api";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   MdLock,
   MdMail,
-  MdOutlineArrowOutward,
   MdPerson,
   MdPhone,
   MdVisibility,
   MdVisibilityOff,
 } from "react-icons/md";
-import { RiChatSmile3Line } from "react-icons/ri";
 
 const Register = () => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -29,16 +29,8 @@ const Register = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    setValidationError((prev) => ({
-      ...prev,
-      [name]: "",
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setValidationError((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleClearForm = () => {
@@ -49,7 +41,6 @@ const Register = () => {
       password: "",
       confirmPassword: "",
     });
-
     setValidationError({});
   };
 
@@ -62,11 +53,7 @@ const Register = () => {
       errors.fullName = "Only alphabets and spaces are allowed";
     }
 
-    if (
-      !/^[\w.]+@(gmail|outlook|ricr|yahoo)\.(com|in|co.in)$/.test(
-        formData.email
-      )
-    ) {
+    if (!/^[\w.+-]+@[\w-]+\.[A-Za-z]{2,}(\.[A-Za-z]{2,})?$/.test(formData.email)) {
       errors.email = "Please enter a valid email address";
     }
 
@@ -83,7 +70,6 @@ const Register = () => {
     }
 
     setValidationError(errors);
-
     return Object.keys(errors).length === 0;
   };
 
@@ -99,419 +85,201 @@ const Register = () => {
 
     try {
       const res = await api.post("/auth/register", formData);
-
-      toast.success(res.data.message);
-
+      toast.success(res.data.message || "Account created — log in to continue");
       handleClearForm();
+      navigate("/login");
     } catch (error) {
-      console.error(error);
-
-      toast.error(
-        error?.response?.data?.message || "Registration failed"
-      );
+      toast.error(error?.response?.data?.message || "Registration failed");
     } finally {
       setIsLoading(false);
     }
   };
 
+  const fieldClass = (hasError) =>
+    `flex items-center gap-2.5 rounded-field border bg-base-100 px-3.5 transition ${
+      hasError
+        ? "border-error focus-within:border-error focus-within:ring-2 focus-within:ring-error/20"
+        : "border-base-300 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/25"
+    }`;
+
   return (
-    <main className="relative min-h-screen overflow-hidden bg-base-200">
+    <main className="grid min-h-screen bg-base-100 md:grid-cols-2">
+      {/* ================= BRAND PANEL ================= */}
+      <section className="relative hidden flex-col justify-between overflow-hidden bg-neutral px-12 py-12 text-neutral-content md:flex lg:px-16">
+        <Link to="/" className="flex items-center gap-2.5">
+          <span className="font-display flex h-9 w-9 items-center justify-center rounded-field bg-primary text-lg font-semibold text-primary-content">
+            द
+          </span>
+          <span className="font-display text-xl font-semibold">DostiHub</span>
+        </Link>
 
-      {/* Background */}
-      <div className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
+        <div className="max-w-sm">
+          <p className="font-display text-3xl font-medium leading-snug text-neutral-content/95 lg:text-4xl">
+            &ldquo;A minute to sign up. A lifetime of group chats
+            ahead.&rdquo;
+          </p>
+        </div>
 
-      <div className="pointer-events-none absolute bottom-0 right-0 h-80 w-80 rounded-full bg-secondary/15 blur-3xl" />
+        <p className="text-xs text-neutral-content/45">
+          © {new Date().getFullYear()} DostiHub. Made with ❤️ in India.
+        </p>
+      </section>
 
-      <div className="relative mx-auto grid min-h-screen max-w-7xl items-center gap-10 px-4 py-8 sm:px-6 lg:grid-cols-2 lg:px-10">
+      {/* ================= FORM PANEL ================= */}
+      <section className="flex items-center justify-center px-4 py-12 sm:px-6">
+        <div className="w-full max-w-sm">
+          <Link to="/" className="mb-8 flex items-center gap-2.5 md:hidden">
+            <span className="font-display flex h-9 w-9 items-center justify-center rounded-field bg-neutral text-lg font-semibold text-primary">
+              द
+            </span>
+            <span className="font-display text-xl font-semibold">DostiHub</span>
+          </Link>
 
-        {/* LEFT BRAND SECTION */}
-        <section className="hidden lg:block">
+          <h1 className="font-display text-2xl font-semibold">Create your account</h1>
+          <p className="mt-2 text-sm text-base-content/55">
+            Start connecting with the people who matter to you.
+          </p>
 
-          <div className="max-w-xl">
-
-            {/* Logo */}
-            <Link
-              to="/"
-              className="inline-flex items-center gap-3"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-xl font-black text-primary-content shadow-lg">
-                D
-              </div>
-
-              <div>
-                <h1 className="text-2xl font-black">
-                  Dosti<span className="text-primary">Hub</span>
-                </h1>
-
-                <p className="text-xs text-base-content/50">
-                  Connect. Chat. Belong.
-                </p>
-              </div>
-            </Link>
-
-            {/* Heading */}
-            <h2 className="mt-16 text-5xl font-black leading-tight xl:text-6xl">
-              Meet your people.
-              <span className="block text-primary">
-                Start your conversations.
+          <form onSubmit={handleSubmit} className="mt-7 space-y-4" noValidate>
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium text-base-content/80">
+                Full name
               </span>
-            </h2>
-
-            <p className="mt-6 max-w-lg text-lg leading-8 text-base-content/65">
-              Create your DostiHub account and connect with friends, family,
-              and communities in one simple space.
-            </p>
-
-            {/* Preview */}
-            <div className="mt-10 max-w-md rounded-3xl border border-base-300 bg-base-100 p-4 shadow-xl">
-
-              <div className="flex items-center gap-3 border-b border-base-300 pb-4">
-
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-content">
-                  <RiChatSmile3Line size={20} />
-                </div>
-
-                <div>
-                  <p className="font-bold">
-                    DostiHub Community
-                  </p>
-
-                  <p className="text-xs text-success">
-                    ● Start connecting
-                  </p>
-                </div>
-
+              <div className={fieldClass(validationError.fullName)}>
+                <MdPerson className="text-lg text-base-content/35" />
+                <input
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  placeholder="Your full name"
+                  disabled={isLoading}
+                  className="h-11 w-full border-none bg-transparent text-sm outline-none"
+                />
               </div>
+              {validationError.fullName && (
+                <p className="mt-1 text-xs text-error">{validationError.fullName}</p>
+              )}
+            </label>
 
-              <div className="space-y-3 py-4 text-sm">
-
-                <div className="w-fit rounded-2xl rounded-tl-sm bg-base-200 px-4 py-3">
-                  Welcome to the community 👋
-                </div>
-
-                <div className="ml-auto w-fit rounded-2xl rounded-tr-sm bg-primary px-4 py-3 text-primary-content">
-                  Let's connect ✨
-                </div>
-
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium text-base-content/80">
+                Email address
+              </span>
+              <div className={fieldClass(validationError.email)}>
+                <MdMail className="text-lg text-base-content/35" />
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="you@example.com"
+                  disabled={isLoading}
+                  className="h-11 w-full border-none bg-transparent text-sm outline-none"
+                />
               </div>
+              {validationError.email && (
+                <p className="mt-1 text-xs text-error">{validationError.email}</p>
+              )}
+            </label>
 
-            </div>
-
-          </div>
-
-        </section>
-
-        {/* REGISTER FORM */}
-        <section className="mx-auto w-full max-w-md">
-
-          {/* Mobile Logo */}
-          <div className="mb-8 flex justify-center lg:hidden">
-
-            <Link
-              to="/"
-              className="flex items-center gap-3"
-            >
-
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-lg font-black text-primary-content">
-                D
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium text-base-content/80">
+                Mobile number
+              </span>
+              <div className={fieldClass(validationError.mobileNumber)}>
+                <MdPhone className="text-lg text-base-content/35" />
+                <input
+                  type="tel"
+                  name="mobileNumber"
+                  value={formData.mobileNumber}
+                  onChange={handleChange}
+                  placeholder="10-digit mobile number"
+                  disabled={isLoading}
+                  className="h-11 w-full border-none bg-transparent text-sm outline-none"
+                />
               </div>
+              {validationError.mobileNumber && (
+                <p className="mt-1 text-xs text-error">{validationError.mobileNumber}</p>
+              )}
+            </label>
 
-              <h1 className="text-2xl font-black">
-                Dosti<span className="text-primary">HUB</span>
-              </h1>
-
-            </Link>
-
-          </div>
-
-          <div className="rounded-3xl border border-base-300 bg-base-100 p-6 shadow-2xl sm:p-8">
-
-            {/* Header */}
-            <div className="mb-8">
-
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
-                Create Account
-              </p>
-
-              <h2 className="mt-2 text-3xl font-black">
-                Join DostiHub
-              </h2>
-
-              <p className="mt-3 text-sm leading-6 text-base-content/60">
-                Create your account and start connecting with your people.
-              </p>
-
-            </div>
-
-            <form
-              onSubmit={handleSubmit}
-              className="space-y-4"
-            >
-
-              {/* Full Name */}
+            <div className="grid grid-cols-2 gap-3">
               <label className="block">
-
-                <span className="mb-2 block text-sm font-semibold">
-                  Full name
-                </span>
-
-                <div className="flex items-center gap-3 rounded-2xl border border-base-300 bg-base-200 px-4 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10">
-
-                  <MdPerson className="text-xl text-base-content/40" />
-
-                  <input
-                    type="text"
-                    name="fullName"
-                    placeholder="Your full name"
-                    value={formData.fullName}
-                    onChange={handleChange}
-                    disabled={isLoading}
-                    required
-                    className="input h-14 w-full border-none bg-transparent px-0 shadow-none focus:outline-none"
-                  />
-
-                </div>
-
-                {validationError.fullName && (
-                  <p className="mt-1 text-xs text-error">
-                    {validationError.fullName}
-                  </p>
-                )}
-
-              </label>
-
-              {/* Email */}
-              <label className="block">
-
-                <span className="mb-2 block text-sm font-semibold">
-                  Email address
-                </span>
-
-                <div className="flex items-center gap-3 rounded-2xl border border-base-300 bg-base-200 px-4 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10">
-
-                  <MdMail className="text-xl text-base-content/40" />
-
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="you@example.com"
-                    value={formData.email}
-                    onChange={handleChange}
-                    disabled={isLoading}
-                    required
-                    className="input h-14 w-full border-none bg-transparent px-0 shadow-none focus:outline-none"
-                  />
-
-                </div>
-
-                {validationError.email && (
-                  <p className="mt-1 text-xs text-error">
-                    {validationError.email}
-                  </p>
-                )}
-
-              </label>
-
-              {/* Mobile */}
-              <label className="block">
-
-                <span className="mb-2 block text-sm font-semibold">
-                  Mobile number
-                </span>
-
-                <div className="flex items-center gap-3 rounded-2xl border border-base-300 bg-base-200 px-4 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10">
-
-                  <MdPhone className="text-xl text-base-content/40" />
-
-                  <span className="text-sm text-base-content/50">
-                    +91
-                  </span>
-
-                  <input
-                    type="tel"
-                    name="mobileNumber"
-                    placeholder="10-digit number"
-                    maxLength={10}
-                    value={formData.mobileNumber}
-                    onChange={handleChange}
-                    disabled={isLoading}
-                    required
-                    className="input h-14 w-full border-none bg-transparent px-0 shadow-none focus:outline-none"
-                  />
-
-                </div>
-
-                {validationError.mobileNumber && (
-                  <p className="mt-1 text-xs text-error">
-                    {validationError.mobileNumber}
-                  </p>
-                )}
-
-              </label>
-
-              {/* Password */}
-              <label className="block">
-
-                <span className="mb-2 block text-sm font-semibold">
+                <span className="mb-1.5 block text-sm font-medium text-base-content/80">
                   Password
                 </span>
-
-                <div className="flex items-center gap-3 rounded-2xl border border-base-300 bg-base-200 px-4 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10">
-
-                  <MdLock className="text-xl text-base-content/40" />
-
+                <div className={fieldClass(validationError.password)}>
+                  <MdLock className="text-base text-base-content/35" />
                   <input
                     type={showPassword ? "text" : "password"}
                     name="password"
-                    placeholder="Create a password"
                     value={formData.password}
                     onChange={handleChange}
+                    placeholder="••••••"
                     disabled={isLoading}
-                    required
-                    className="input h-14 w-full border-none bg-transparent px-0 shadow-none focus:outline-none"
+                    className="h-11 w-full min-w-0 border-none bg-transparent text-sm outline-none"
                   />
-
                   <button
                     type="button"
-                    onClick={() =>
-                      setShowPassword((prev) => !prev)
-                    }
-                    className="text-xl text-base-content/40 transition hover:text-primary"
+                    onClick={() => setShowPassword((p) => !p)}
+                    className="shrink-0 text-base text-base-content/35 hover:text-base-content/70"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
-                    {showPassword ? (
-                      <MdVisibilityOff />
-                    ) : (
-                      <MdVisibility />
-                    )}
+                    {showPassword ? <MdVisibilityOff /> : <MdVisibility />}
                   </button>
-
                 </div>
-
-                {validationError.password && (
-                  <p className="mt-1 text-xs text-error">
-                    {validationError.password}
-                  </p>
-                )}
-
               </label>
 
-              {/* Confirm Password */}
               <label className="block">
-
-                <span className="mb-2 block text-sm font-semibold">
-                  Confirm password
+                <span className="mb-1.5 block text-sm font-medium text-base-content/80">
+                  Confirm
                 </span>
-
-                <div className="flex items-center gap-3 rounded-2xl border border-base-300 bg-base-200 px-4 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10">
-
-                  <MdLock className="text-xl text-base-content/40" />
-
+                <div className={fieldClass(validationError.confirmPassword)}>
+                  <MdLock className="text-base text-base-content/35" />
                   <input
-                    type={
-                      showConfirmPassword
-                        ? "text"
-                        : "password"
-                    }
+                    type={showConfirmPassword ? "text" : "password"}
                     name="confirmPassword"
-                    placeholder="Re-enter your password"
                     value={formData.confirmPassword}
                     onChange={handleChange}
+                    placeholder="••••••"
                     disabled={isLoading}
-                    required
-                    className="input h-14 w-full border-none bg-transparent px-0 shadow-none focus:outline-none"
+                    className="h-11 w-full min-w-0 border-none bg-transparent text-sm outline-none"
                   />
-
                   <button
                     type="button"
-                    onClick={() =>
-                      setShowConfirmPassword(
-                        (prev) => !prev
-                      )
-                    }
-                    className="text-xl text-base-content/40 transition hover:text-primary"
+                    onClick={() => setShowConfirmPassword((p) => !p)}
+                    className="shrink-0 text-base text-base-content/35 hover:text-base-content/70"
+                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                   >
-                    {showConfirmPassword ? (
-                      <MdVisibilityOff />
-                    ) : (
-                      <MdVisibility />
-                    )}
+                    {showConfirmPassword ? <MdVisibilityOff /> : <MdVisibility />}
                   </button>
-
                 </div>
-
-                {validationError.confirmPassword && (
-                  <p className="mt-1 text-xs text-error">
-                    {validationError.confirmPassword}
-                  </p>
-                )}
-
               </label>
-
-              {/* Buttons */}
-              <div className="grid gap-3 pt-3 sm:grid-cols-2">
-
-                <button
-                  type="button"
-                  onClick={handleClearForm}
-                  disabled={isLoading}
-                  className="btn btn-outline h-14 rounded-2xl"
-                >
-                  Clear
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="btn btn-primary h-14 rounded-2xl text-base font-bold"
-                >
-                  {isLoading
-                    ? "Creating..."
-                    : "Create Account"}
-                </button>
-
-              </div>
-
-            </form>
-
-            {/* Login Link */}
-            <div className="mt-7 rounded-2xl bg-base-200 p-4">
-
-              <div className="flex items-center justify-between gap-4">
-
-                <div>
-
-                  <p className="text-sm font-semibold">
-                    Already have an account?
-                  </p>
-
-                  <p className="mt-1 text-xs text-base-content/60">
-                    Sign in to continue your conversations.
-                  </p>
-
-                </div>
-
-                <Link
-                  to="/login"
-                  className="btn btn-primary btn-sm rounded-xl"
-                >
-                  Login
-                  <MdOutlineArrowOutward />
-                </Link>
-
-              </div>
-
             </div>
+            {(validationError.password || validationError.confirmPassword) && (
+              <p className="-mt-2 text-xs text-error">
+                {validationError.password || validationError.confirmPassword}
+              </p>
+            )}
 
-            <p className="mt-6 text-center text-xs text-base-content/45">
-              Your account details are protected.
-            </p>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="mt-2 flex h-12 w-full items-center justify-center rounded-field bg-primary text-sm font-semibold text-primary-content shadow-sm transition-transform hover:-translate-y-px active:translate-y-0 disabled:opacity-60"
+            >
+              {isLoading ? "Creating account…" : "Create account"}
+            </button>
+          </form>
 
-          </div>
-
-        </section>
-
-      </div>
-
+          <p className="mt-7 text-center text-sm text-base-content/55">
+            Already on DostiHub?{" "}
+            <Link to="/login" className="font-semibold text-link hover:underline">
+              Log in
+            </Link>
+          </p>
+        </div>
+      </section>
     </main>
   );
 };

@@ -2,6 +2,7 @@ import express from "express";
 import {
   getAllUsers,
   getRecentUsers,
+  getUserProfile,
   updateProfile,
   fetchMessages,
   sendMessage,
@@ -15,6 +16,9 @@ router.get("/allUsers", Protect, getAllUsers);
 
 // Get recent chat users
 router.get("/recentUsers", Protect, getRecentUsers);
+
+// Get a single user's safe, public-facing profile (e.g. a chat participant)
+router.get("/profile/:userId", Protect, getUserProfile);
 
 // Update current user profile
 router.put("/profile", Protect, updateProfile);

@@ -3,8 +3,131 @@
   themes: all;
 }
 @import "flyonui/variants.css";
-@source "../node_modules/flyonui/flyonui.js"; 
+@source "../node_modules/flyonui/flyonui.js";
 
+/* =========================================================================
+   DOSTIHUB DESIGN SYSTEM
+   A warm, ink-and-marigold identity for a friends & family messaging app.
+   "Dosti" = friendship in Hindi — the palette leans into warmth (marigold,
+   the flower used at Indian celebrations and gatherings) against a deep,
+   quiet ink, rather than a generic blue SaaS or all-black chat-app look.
+   ========================================================================= */
+
+@theme {
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ---- Light theme: "dostihub" -------------------------------------------- */
+[data-theme="dostihub"] {
+  color-scheme: light;
+
+  --color-base-100: #ffffff;      /* cards, panels, message-in bubbles */
+  --color-base-200: #f6f4ee;      /* page background */
+  --color-base-300: #e7e1d1;      /* hairline borders/dividers */
+  --color-base-content: #26232f;  /* ink — primary text */
+
+  --color-primary: #dc9f35;               /* marigold */
+  --color-primary-content: #2b1c02;       /* deep brown-black text on marigold */
+
+  --color-secondary: #6b6785;             /* dusk mauve-grey */
+  --color-secondary-content: #f7f6f3;
+
+  --color-accent: #2f7566;                /* deep teal */
+  --color-accent-content: #eefaf6;
+
+  --color-neutral: #211f2c;               /* ink rail (nav) */
+  --color-neutral-content: #f1ede3;
+
+  --color-info: #3d7ea6;
+  --color-info-content: #eef7fc;
+
+  --color-success: #2f7d67;
+  --color-success-content: #eefaf5;
+
+  --color-warning: #b9791f;
+  --color-warning-content: #fdf5e8;
+
+  --color-error: #c1503a;
+  --color-error-content: #fdf0ec;
+
+  /* Dedicated link color: --color-primary (marigold) is vivid and reads
+     well on dark or filled surfaces (buttons, active nav states) but fails
+     WCAG AA (2.3:1) as small text directly on a light background. --color-link
+     is a darker, same-hue shade reserved for that use. */
+  --color-link: #a1690f;
+
+  --radius-selector: 0.6rem;
+  --radius-field: 0.85rem;
+  --radius-box: 1.1rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* ---- Dark theme: "dostihub-dark" ----------------------------------------- */
+[data-theme="dostihub-dark"] {
+  color-scheme: dark;
+
+  --color-base-100: #211f2b;      /* elevated surface */
+  --color-base-200: #17151e;      /* app background */
+  --color-base-300: #322f40;      /* borders */
+  --color-base-content: #ece8f5;  /* warm off-white ink */
+
+  --color-primary: #e8ae4d;
+  --color-primary-content: #241a05;
+
+  --color-secondary: #948ea9;
+  --color-secondary-content: #17151e;
+
+  --color-accent: #45a999;
+  --color-accent-content: #0c211d;
+
+  --color-neutral: #17151e;
+  --color-neutral-content: #ece8f5;
+
+  --color-info: #6bb3db;
+  --color-info-content: #0b2331;
+
+  --color-success: #56b596;
+  --color-success-content: #0b2118;
+
+  --color-warning: #d99b41;
+  --color-warning-content: #2b1c04;
+
+  --color-error: #dc7259;
+  --color-error-content: #2c0f08;
+
+  /* Marigold is already high-contrast against this dark surface, so the
+     dark theme can reuse --color-primary directly for link text. */
+  --color-link: #e8ae4d;
+
+  --radius-selector: 0.6rem;
+  --radius-field: 0.85rem;
+  --radius-box: 1.1rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.text-link {
+  color: var(--color-link);
+}
+
+/* One deliberate, orchestrated entrance for the landing hero only —
+   not scattered across every card and section. */
 @keyframes fade-up-soft {
   from {
     opacity: 0;
@@ -17,10 +140,46 @@
 }
 
 .fade-up-soft {
-  animation: fade-up-soft 0.65s ease-out both;
+  animation: fade-up-soft 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .stagger-soft {
   opacity: 0;
-  animation: fade-up-soft 0.65s ease-out both;
+  animation: fade-up-soft 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Message bubbles enter with a small, quick settle — motion that answers
+   the action of a message arriving, not decoration. */
+@keyframes message-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.message-in {
+  animation: message-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-up-soft,
+  .stagger-soft,
+  .message-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

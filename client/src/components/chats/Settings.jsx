@@ -1,174 +1,125 @@
-import React, { useEffect, useState } from "react";
-import { IoArrowBack, IoColorPaletteOutline } from "react-icons/io5";
-import { MdDarkMode, MdLightMode } from "react-icons/md";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { IoArrowBack, IoColorPaletteOutline, IoLogOutOutline } from "react-icons/io5";
+import { Sun, Moon, Laptop } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import {
+  LIGHT_THEME,
+  DARK_THEME,
+  getStoredThemePreference,
+  setStoredThemePreference,
+} from "../../config/theme";
+
+const THEME_OPTIONS = [
+  { value: LIGHT_THEME, label: "Light", icon: Sun },
+  { value: "system", label: "System", icon: Laptop },
+  { value: DARK_THEME, label: "Dark", icon: Moon },
+];
 
 const Settings = ({ setActivePage }) => {
-  const [theme, setTheme] = useState("");
+  const navigate = useNavigate();
+  const { setUser, setIsLogin } = useAuth();
 
-  const themes = [
-    { value: "", label: "Default" },
-    { value: "light", label: "Light" },
-    { value: "dark", label: "Dark" },
-    { value: "claude", label: "Claude" },
-    { value: "spotify", label: "Spotify" },
-    { value: "vscode", label: "VSCode" },
-    { value: "black", label: "Black" },
-    { value: "corporate", label: "Corporate" },
-    { value: "ghibli", label: "Ghibli" },
-    { value: "gourmet", label: "Gourmet" },
-    { value: "luxury", label: "Luxury" },
-    { value: "mintlify", label: "Mintlify" },
-    { value: "pastel", label: "Pastel" },
-    { value: "perplexity", label: "Perplexity" },
-    { value: "shadcn", label: "Shadcn" },
-    { value: "slack", label: "Slack" },
-    { value: "soft", label: "Soft" },
-    { value: "valorant", label: "Valorant" },
-  ];
+  const [themePreference, setThemePreference] = useState(() => getStoredThemePreference());
 
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("chatKroTheme") || "";
-
-    setTheme(savedTheme);
-
-    if (savedTheme) {
-      document.documentElement.setAttribute("data-theme", savedTheme);
-    } else {
-      document.documentElement.removeAttribute("data-theme");
-    }
-  }, []);
-
-  const handleThemeChange = (event) => {
-    const selectedTheme = event.target.value;
-
-    setTheme(selectedTheme);
-    localStorage.setItem("chatKroTheme", selectedTheme);
-
-    if (selectedTheme) {
-      document.documentElement.setAttribute("data-theme", selectedTheme);
-    } else {
-      document.documentElement.removeAttribute("data-theme");
-    }
+  const handleThemeChange = (value) => {
+    setThemePreference(value);
+    setStoredThemePreference(value);
   };
 
-  const selectedTheme =
-    themes.find((item) => item.value === theme)?.label || "Default";
+  const handleLogout = () => {
+    sessionStorage.removeItem("AppUser");
+    setUser(null);
+    setIsLogin(false);
+    toast.success("Logged out successfully");
+    navigate("/login");
+  };
 
   return (
     <div className="flex h-full flex-col bg-base-200">
       {/* HEADER */}
-      <div className="flex items-center gap-4 border-b border-base-300 bg-base-100 px-4 py-4 shadow-sm">
+      <div className="flex items-center gap-3 border-b border-base-300 bg-base-100 px-4 py-4">
         <button
           onClick={() => setActivePage("contacts")}
-          className="btn btn-circle btn-ghost btn-sm"
+          className="flex h-9 w-9 items-center justify-center rounded-field text-base-content/70 hover:bg-base-200"
           title="Back"
         >
           <IoArrowBack className="text-xl" />
         </button>
 
         <div>
-          <h2 className="text-xl font-bold text-base-content">
-            Settings
-          </h2>
-
-          <p className="text-xs text-base-content/60">
-            Customize your DostiHUB experience
-          </p>
+          <h2 className="font-display text-xl font-semibold text-base-content">Settings</h2>
+          <p className="text-xs text-base-content/55">Your DostiHub preferences</p>
         </div>
       </div>
 
       {/* CONTENT */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-6">
-        <div className="mx-auto max-w-3xl space-y-5">
-
+      <div className="flex-1 overflow-y-auto p-4 md:p-8">
+        <div className="mx-auto max-w-2xl space-y-5">
           {/* APPEARANCE */}
-          <section className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
+          <section className="rounded-box border border-base-300 bg-base-100 p-5">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <IoColorPaletteOutline className="text-2xl" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-field bg-primary/10 text-primary">
+                <IoColorPaletteOutline className="text-xl" />
               </div>
-
               <div>
-                <h3 className="text-lg font-bold">
-                  Appearance
-                </h3>
-
-                <p className="text-sm text-base-content/60">
-                  Customize the look and feel of DostiHUB.
-                </p>
+                <h3 className="font-semibold">Appearance</h3>
+                <p className="text-sm text-base-content/55">Choose how DostiHub looks on this device.</p>
               </div>
             </div>
 
-            {/* CURRENT THEME */}
-            <div className="mt-5 flex items-center justify-between rounded-xl bg-base-200 p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-content">
-                  {theme === "dark" ? (
-                    <MdDarkMode className="text-xl" />
-                  ) : (
-                    <MdLightMode className="text-xl" />
-                  )}
-                </div>
-
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-base-content/60">
-                    Current Theme
-                  </p>
-
-                  <p className="font-semibold">
-                    {selectedTheme}
-                  </p>
-                </div>
-              </div>
-
-              <span className="badge badge-primary">
-                Active
-              </span>
+            <div className="mt-5 grid grid-cols-3 gap-2">
+              {THEME_OPTIONS.map((option) => {
+                const active = themePreference === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => handleThemeChange(option.value)}
+                    className={`flex flex-col items-center gap-2 rounded-field border py-4 text-sm font-medium transition-colors ${
+                      active
+                        ? "border-primary bg-primary/10 text-link"
+                        : "border-base-300 text-base-content/65 hover:bg-base-200"
+                    }`}
+                  >
+                    <option.icon size={18} />
+                    {option.label}
+                  </button>
+                );
+              })}
             </div>
           </section>
 
-          {/* THEME SELECTOR */}
-          <section className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
-            <h3 className="text-lg font-bold">
-              Choose Theme
-            </h3>
+          {/* SESSION */}
+          <section className="rounded-box border border-base-300 bg-base-100 p-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-field bg-error/10 text-error">
+                <IoLogOutOutline className="text-xl" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Session</h3>
+                <p className="text-sm text-base-content/55">Sign out of DostiHub on this device.</p>
+              </div>
+            </div>
 
-            <p className="mt-1 text-sm text-base-content/60">
-              Select your preferred theme.
-            </p>
-
-            <select
-              value={theme}
-              onChange={handleThemeChange}
-              className="select select-bordered mt-4 w-full"
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-field border border-error/30 text-sm font-semibold text-error transition hover:bg-error/10"
             >
-              {themes.map((item) => (
-                <option
-                  key={item.value}
-                  value={item.value}
-                >
-                  {item.label}
-                </option>
-              ))}
-            </select>
+              <IoLogOutOutline className="text-lg" />
+              Log out
+            </button>
           </section>
 
           {/* APP INFO */}
-          <section className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
-            <h3 className="font-bold text-primary">
-              DostiHUB
-            </h3>
-
+          <section className="rounded-box border border-primary/20 bg-primary/5 p-5">
+            <h3 className="font-display font-semibold text-link">DostiHub</h3>
             <p className="mt-2 text-sm leading-6 text-base-content/70">
-              Connect with your friends and contacts through real-time
-              conversations.
-            </p>
-
-            <p className="mt-3 text-xs text-base-content/50">
-              Your conversations. Your connections. Your space.
+              Connect with your friends and family through real-time conversations.
             </p>
           </section>
-
         </div>
       </div>
     </div>

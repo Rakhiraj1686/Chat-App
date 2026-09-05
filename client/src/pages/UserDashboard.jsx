@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import api from "../config/api";
 import { useAuth } from "../context/AuthContext";
 import { FaArrowLeft, FaCamera } from "react-icons/fa";
 import {
@@ -31,6 +32,7 @@ const UserDashboard = () => {
   );
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setProfileForm(getProfileForm(currentUser));
@@ -95,7 +97,7 @@ const UserDashboard = () => {
     setIsEditing(false);
   };
 
-  const handleSaveProfile = (event) => {
+  const handleSaveProfile = async (event) => {
     event.preventDefault();
 
     if (!profileForm.fullName.trim()) {
@@ -119,23 +121,36 @@ const UserDashboard = () => {
       return;
     }
 
-    const updatedUser = {
-      ...(currentUser || {}),
-      fullName: profileForm.fullName.trim(),
-      email: profileForm.email.trim(),
-      mobileNumber: profileForm.mobileNumber.trim(),
-      about: profileForm.about.trim(),
-    };
+    setIsSaving(true);
 
-    sessionStorage.setItem(
-      "AppUser",
-      JSON.stringify(updatedUser)
-    );
+    try {
+      // Persist to the backend (PUT /user/profile) instead of only writing
+      // to sessionStorage, so the change actually survives a refresh/re-login
+      // and other users see the updated name.
+      const res = await api.put("/user/profile", {
+        fullName: profileForm.fullName.trim(),
+        email: profileForm.email.trim(),
+        mobileNumber: profileForm.mobileNumber.trim(),
+        about: profileForm.about.trim(),
+      });
 
-    setUser(updatedUser);
-    setIsEditing(false);
+      const updatedUser = {
+        ...(currentUser || {}),
+        ...res.data.data,
+      };
 
-    toast.success("Profile updated successfully");
+      sessionStorage.setItem("AppUser", JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      setIsEditing(false);
+
+      toast.success(res.data.message || "Profile updated successfully");
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message || "Failed to update profile"
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -146,7 +161,7 @@ const UserDashboard = () => {
         <div className="mb-5 flex items-center justify-between">
           <Link
             to="/chatting"
-            className="btn btn-ghost gap-2 rounded-xl"
+            className="btn btn-ghost gap-2 rounded-field"
           >
             <FaArrowLeft />
             Back to Chat
@@ -154,7 +169,7 @@ const UserDashboard = () => {
 
           <button
             onClick={handleLogout}
-            className="btn btn-ghost btn-error gap-2 rounded-xl"
+            className="btn btn-ghost btn-error gap-2 rounded-field"
           >
             <MdLogout className="text-lg" />
             Logout
@@ -162,10 +177,10 @@ const UserDashboard = () => {
         </div>
 
         {/* Profile Card */}
-        <section className="overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-xl">
+        <section className="overflow-hidden rounded-box border border-base-300 bg-base-100 shadow-xl">
 
           {/* Cover */}
-          <div className="h-32 bg-primary md:h-44" />
+          <div className="h-32 bg-neutral md:h-44" />
 
           {/* Profile Header */}
           <div className="relative px-5 pb-6 md:px-8">
@@ -191,7 +206,7 @@ const UserDashboard = () => {
 
               {/* Name */}
               <div className="flex-1 text-center sm:text-left">
-                <h1 className="text-2xl font-black md:text-3xl">
+                <h1 className="font-display text-2xl font-semibold md:text-3xl">
                   {userName}
                 </h1>
 
@@ -204,7 +219,7 @@ const UserDashboard = () => {
               {!isEditing && (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="btn btn-primary gap-2 rounded-xl"
+                  className="btn btn-primary gap-2 rounded-field"
                 >
                   <MdEdit className="text-lg" />
                   Edit Profile
@@ -213,13 +228,13 @@ const UserDashboard = () => {
             </div>
 
             {/* Profile Strength */}
-            <div className="mt-6 rounded-2xl bg-base-200 p-4">
+            <div className="mt-6 rounded-field bg-base-200 p-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold">
                   Profile completion
                 </p>
 
-                <span className="font-bold text-primary">
+                <span className="font-bold text-link">
                   {profileStrength}%
                 </span>
               </div>
@@ -238,20 +253,16 @@ const UserDashboard = () => {
             {/* Profile Information */}
             <section>
               <div className="mb-4">
-                <p className="text-xs font-bold uppercase tracking-widest text-primary">
-                  Profile
-                </p>
-
-                <h2 className="mt-1 text-2xl font-black">
-                  Personal Information
+                <h2 className="font-display text-xl font-semibold">
+                  Personal information
                 </h2>
               </div>
 
               <div className="space-y-3">
 
                 {/* Email */}
-                <div className="flex items-center gap-4 rounded-2xl bg-base-200 p-4">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <div className="flex items-center gap-4 rounded-field bg-base-200 p-4">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-field bg-primary/10 text-primary">
                     <MdMail className="text-xl" />
                   </div>
 
@@ -267,8 +278,8 @@ const UserDashboard = () => {
                 </div>
 
                 {/* Phone */}
-                <div className="flex items-center gap-4 rounded-2xl bg-base-200 p-4">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <div className="flex items-center gap-4 rounded-field bg-base-200 p-4">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-field bg-primary/10 text-primary">
                     <MdPhone className="text-xl" />
                   </div>
 
@@ -284,7 +295,7 @@ const UserDashboard = () => {
                 </div>
 
                 {/* About */}
-                <div className="rounded-2xl bg-base-200 p-4">
+                <div className="rounded-field bg-base-200 p-4">
                   <p className="text-xs font-semibold uppercase text-base-content/50">
                     About
                   </p>
@@ -299,19 +310,15 @@ const UserDashboard = () => {
             {/* Edit Profile */}
             <section>
               <div className="mb-4">
-                <p className="text-xs font-bold uppercase tracking-widest text-primary">
-                  Account Settings
-                </p>
-
-                <h2 className="mt-1 text-2xl font-black">
-                  {isEditing ? "Edit Profile" : "Your Account"}
+                <h2 className="font-display text-xl font-semibold">
+                  {isEditing ? "Edit profile" : "Your account"}
                 </h2>
               </div>
 
               {!isEditing ? (
-                <div className="rounded-2xl border border-base-300 bg-base-200 p-5">
+                <div className="rounded-field border border-base-300 bg-base-200 p-5">
                   <div className="flex items-start gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-content">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-field bg-primary text-primary-content">
                       <MdPerson className="text-2xl" />
                     </div>
 
@@ -329,7 +336,7 @@ const UserDashboard = () => {
 
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="btn btn-primary mt-5 w-full rounded-xl"
+                    className="btn btn-primary mt-5 w-full rounded-field"
                   >
                     <MdEdit />
                     Edit Profile
@@ -409,17 +416,22 @@ const UserDashboard = () => {
                     <button
                       type="button"
                       onClick={handleReset}
-                      className="btn btn-outline flex-1 rounded-xl"
+                      className="btn btn-outline flex-1 rounded-field"
                     >
                       Cancel
                     </button>
 
                     <button
                       type="submit"
-                      className="btn btn-primary flex-1 gap-2 rounded-xl"
+                      disabled={isSaving}
+                      className="btn btn-primary flex-1 gap-2 rounded-field"
                     >
-                      <MdSave className="text-lg" />
-                      Save Changes
+                      {isSaving ? (
+                        <span className="loading loading-spinner loading-sm" />
+                      ) : (
+                        <MdSave className="text-lg" />
+                      )}
+                      {isSaving ? "Saving..." : "Save Changes"}
                     </button>
                   </div>
                 </form>
