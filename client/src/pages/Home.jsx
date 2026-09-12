@@ -66,7 +66,7 @@ const Home = () => {
 
           {/* RIGHT: a real conversation preview, not a decorative blob */}
           <div className="fade-up-soft" style={{ animationDelay: "120ms" }}>
-            <div className="overflow-hidden rounded-box border border-base-300 bg-base-100 shadow-xl shadow-base-content/[0.04]">
+            <div className="overflow-hidden rounded-box border border-base-300 bg-base-100 shadow-xl shadow-base-content/4">
               <div className="flex items-center gap-3 border-b border-base-300 px-5 py-4">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral text-sm font-semibold text-neutral-content">
                   AS
