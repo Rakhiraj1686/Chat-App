@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../config/api";
 import { useAuth } from "../context/AuthContext";
-import { FaArrowLeft, FaCamera } from "react-icons/fa";
+
 import {
-  MdEdit,
-  MdLogout,
-  MdMail,
-  MdPhone,
-  MdPerson,
-  MdSave,
-} from "react-icons/md";
+  IoArrowBack,
+  IoCameraOutline,
+  IoChevronForward,
+  IoLogOutOutline,
+  IoMailOutline,
+  IoCallOutline,
+  IoPersonOutline,
+  IoInformationCircleOutline,
+  IoCheckmarkCircle,
+  IoCreateOutline,
+} from "react-icons/io5";
 
 const getProfileForm = (account) => ({
   fullName: account?.fullName || account?.name || "",
@@ -19,6 +23,14 @@ const getProfileForm = (account) => ({
   mobileNumber: account?.mobileNumber || account?.phoneNumber || "",
   about: account?.about || "",
 });
+
+const getInitials = (name = "") =>
+  name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("") || "DU";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -54,12 +66,7 @@ const UserDashboard = () => {
     currentUser?.about ||
     "Hey there! I am using DostiHUB.";
 
-  const initials = userName
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
+  const initials = getInitials(userName);
 
   const profileFields = [
     currentUser?.fullName || currentUser?.name,
@@ -72,16 +79,6 @@ const UserDashboard = () => {
     100,
     profileFields.filter(Boolean).length * 25
   );
-
-  const handleLogout = () => {
-    sessionStorage.removeItem("AppUser");
-
-    setUser(null);
-    setIsLogin(false);
-
-    toast.success("Logged out successfully");
-    navigate("/login");
-  };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -97,25 +94,40 @@ const UserDashboard = () => {
     setIsEditing(false);
   };
 
+  const handleLogout = () => {
+    sessionStorage.removeItem("AppUser");
+
+    setUser(null);
+    setIsLogin(false);
+
+    toast.success("Logged out successfully");
+    navigate("/login");
+  };
+
   const handleSaveProfile = async (event) => {
     event.preventDefault();
 
-    if (!profileForm.fullName.trim()) {
+    const fullName = profileForm.fullName.trim();
+    const email = profileForm.email.trim();
+    const mobileNumber = profileForm.mobileNumber.trim();
+    const about = profileForm.about.trim();
+
+    if (!fullName) {
       toast.error("Name is required");
       return;
     }
 
     if (
-      profileForm.email &&
-      !/^[\w.-]+@[\w.-]+\.[A-Za-z]{2,}$/.test(profileForm.email)
+      email &&
+      !/^[\w.-]+@[\w.-]+\.[A-Za-z]{2,}$/.test(email)
     ) {
       toast.error("Please enter a valid email address");
       return;
     }
 
     if (
-      profileForm.mobileNumber &&
-      !/^[0-9]{10,15}$/.test(profileForm.mobileNumber)
+      mobileNumber &&
+      !/^[0-9]{10,15}$/.test(mobileNumber)
     ) {
       toast.error("Phone number should contain 10-15 digits");
       return;
@@ -124,14 +136,11 @@ const UserDashboard = () => {
     setIsSaving(true);
 
     try {
-      // Persist to the backend (PUT /user/profile) instead of only writing
-      // to sessionStorage, so the change actually survives a refresh/re-login
-      // and other users see the updated name.
       const res = await api.put("/user/profile", {
-        fullName: profileForm.fullName.trim(),
-        email: profileForm.email.trim(),
-        mobileNumber: profileForm.mobileNumber.trim(),
-        about: profileForm.about.trim(),
+        fullName,
+        email,
+        mobileNumber,
+        about,
       });
 
       const updatedUser = {
@@ -139,14 +148,21 @@ const UserDashboard = () => {
         ...res.data.data,
       };
 
-      sessionStorage.setItem("AppUser", JSON.stringify(updatedUser));
+      sessionStorage.setItem(
+        "AppUser",
+        JSON.stringify(updatedUser)
+      );
+
       setUser(updatedUser);
       setIsEditing(false);
 
-      toast.success(res.data.message || "Profile updated successfully");
+      toast.success(
+        res.data.message || "Profile updated successfully"
+      );
     } catch (error) {
       toast.error(
-        error?.response?.data?.message || "Failed to update profile"
+        error?.response?.data?.message ||
+          "Failed to update profile"
       );
     } finally {
       setIsSaving(false);
@@ -154,293 +170,404 @@ const UserDashboard = () => {
   };
 
   return (
-    <main className="min-h-[calc(100vh-64px)] bg-base-200 px-3 py-5 md:px-6 md:py-8">
-      <div className="mx-auto max-w-5xl">
-
-        {/* Top Navigation */}
-        <div className="mb-5 flex items-center justify-between">
-          <Link
-            to="/chatting"
-            className="btn btn-ghost gap-2 rounded-field"
-          >
-            <FaArrowLeft />
-            Back to Chat
-          </Link>
-
+    <div className="min-h-screen bg-base-200 text-base-content">
+      {/* =====================================================
+          HEADER
+      ===================================================== */}
+      <header className="sticky top-0 z-30 border-b border-base-300 bg-base-100/95 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-3xl items-center gap-3 px-4">
           <button
-            onClick={handleLogout}
-            className="btn btn-ghost btn-error gap-2 rounded-field"
+            type="button"
+            onClick={() => navigate("/chatting")}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-base-content/70 transition hover:bg-base-200 active:scale-95"
+            aria-label="Back to chat"
           >
-            <MdLogout className="text-lg" />
-            Logout
+            <IoArrowBack className="text-xl" />
           </button>
+
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-lg font-semibold">
+              Profile
+            </h1>
+
+            <p className="text-xs text-base-content/50">
+              DostiHUB
+            </p>
+          </div>
+
+          {!isEditing && (
+            <button
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className="flex h-10 items-center gap-2 rounded-full px-3 text-sm font-semibold text-primary transition hover:bg-primary/10"
+            >
+              <IoCreateOutline className="text-lg" />
+              <span className="hidden sm:inline">
+                Edit
+              </span>
+            </button>
+          )}
         </div>
+      </header>
 
-        {/* Profile Card */}
-        <section className="overflow-hidden rounded-box border border-base-300 bg-base-100 shadow-xl">
-
+      {/* =====================================================
+          MAIN
+      ===================================================== */}
+      <main className="mx-auto max-w-3xl px-3 py-4 sm:px-5 sm:py-6">
+        {/* =================================================
+            PROFILE HERO
+        ================================================= */}
+        <section className="overflow-hidden rounded-2xl bg-base-100 shadow-sm">
           {/* Cover */}
-          <div className="h-32 bg-neutral md:h-44" />
+          <div className="relative h-28 bg-gradient-to-r from-primary/80 via-primary to-primary/70 sm:h-36">
+            <div className="absolute inset-0 opacity-20">
+              <div className="absolute -right-10 -top-16 h-48 w-48 rounded-full border-[25px] border-white/30" />
+              <div className="absolute -bottom-24 left-10 h-48 w-48 rounded-full border-[25px] border-white/20" />
+            </div>
+          </div>
 
-          {/* Profile Header */}
-          <div className="relative px-5 pb-6 md:px-8">
-
-            <div className="-mt-14 flex flex-col items-center gap-4 sm:flex-row sm:items-end">
-
-              {/* Avatar */}
+          {/* Profile */}
+          <div className="relative px-5 pb-6 sm:px-8">
+            {/* Avatar */}
+            <div className="-mt-14 flex justify-center sm:justify-start">
               <div className="relative">
-                <div className="flex h-28 w-28 items-center justify-center rounded-full border-4 border-base-100 bg-primary text-4xl font-bold text-primary-content shadow-xl">
-                  {initials || "DU"}
+                <div className="flex h-28 w-28 items-center justify-center rounded-full border-[5px] border-base-100 bg-neutral text-3xl font-bold text-neutral-content shadow-lg">
+                  {initials}
                 </div>
 
                 <button
                   type="button"
-                  className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full bg-base-100 text-primary shadow-md"
                   onClick={() =>
                     toast("Profile photo upload coming soon")
                   }
+                  className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-content shadow-md transition hover:scale-105 active:scale-95"
+                  aria-label="Change profile photo"
                 >
-                  <FaCamera />
+                  <IoCameraOutline className="text-lg" />
                 </button>
               </div>
-
-              {/* Name */}
-              <div className="flex-1 text-center sm:text-left">
-                <h1 className="font-display text-2xl font-semibold md:text-3xl">
-                  {userName}
-                </h1>
-
-                <p className="mt-1 text-sm text-base-content/60">
-                  {userEmail}
-                </p>
-              </div>
-
-              {/* Edit Button */}
-              {!isEditing && (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="btn btn-primary gap-2 rounded-field"
-                >
-                  <MdEdit className="text-lg" />
-                  Edit Profile
-                </button>
-              )}
             </div>
 
-            {/* Profile Strength */}
-            <div className="mt-6 rounded-field bg-base-200 p-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold">
-                  Profile completion
-                </p>
+            {/* Name */}
+            <div className="mt-4 text-center sm:text-left">
+              <h2 className="text-2xl font-bold">
+                {userName}
+              </h2>
 
-                <span className="font-bold text-link">
+              <p className="mt-1 text-sm text-base-content/55">
+                {userEmail}
+              </p>
+
+              <div className="mt-3 flex items-center justify-center gap-2 sm:justify-start">
+                <span className="flex items-center gap-1.5 text-xs font-medium text-success">
+                  <span className="h-2 w-2 rounded-full bg-success" />
+                  DostiHUB user
+                </span>
+              </div>
+            </div>
+
+            {/* Profile Completion */}
+            <div className="mt-6 rounded-xl bg-base-200 p-4">
+              <div className="mb-2 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold">
+                    Profile completion
+                  </p>
+
+                  <p className="mt-0.5 text-xs text-base-content/50">
+                    Complete your profile
+                  </p>
+                </div>
+
+                <span className="text-sm font-bold text-primary">
                   {profileStrength}%
                 </span>
               </div>
 
               <progress
-                className="progress progress-primary mt-3 h-2 w-full"
+                className="progress progress-primary h-1.5 w-full"
                 value={profileStrength}
                 max="100"
               />
             </div>
           </div>
+        </section>
 
-          {/* Content */}
-          <div className="grid gap-6 border-t border-base-300 p-5 md:grid-cols-2 md:p-8">
+        {/* =================================================
+            EDIT FORM
+        ================================================= */}
+        {isEditing ? (
+          <section className="mt-4 overflow-hidden rounded-2xl bg-base-100 shadow-sm">
+            <div className="border-b border-base-300 px-5 py-4 sm:px-6">
+              <h2 className="font-semibold">
+                Edit profile
+              </h2>
 
-            {/* Profile Information */}
-            <section>
-              <div className="mb-4">
-                <h2 className="font-display text-xl font-semibold">
-                  Personal information
+              <p className="mt-1 text-xs text-base-content/50">
+                Update your personal information
+              </p>
+            </div>
+
+            <form
+              onSubmit={handleSaveProfile}
+              className="space-y-5 p-5 sm:p-6"
+            >
+              {/* Full Name */}
+              <label className="block">
+                <span className="mb-2 block text-sm font-semibold">
+                  Name
+                </span>
+
+                <div className="relative">
+                  <IoPersonOutline className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg text-base-content/40" />
+
+                  <input
+                    type="text"
+                    name="fullName"
+                    value={profileForm.fullName}
+                    onChange={handleChange}
+                    placeholder="Your full name"
+                    className="input input-bordered h-12 w-full pl-11 focus:border-primary focus:outline-none"
+                  />
+                </div>
+              </label>
+
+              {/* Email */}
+              <label className="block">
+                <span className="mb-2 block text-sm font-semibold">
+                  Email
+                </span>
+
+                <div className="relative">
+                  <IoMailOutline className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg text-base-content/40" />
+
+                  <input
+                    type="email"
+                    name="email"
+                    value={profileForm.email}
+                    onChange={handleChange}
+                    placeholder="name@email.com"
+                    className="input input-bordered h-12 w-full pl-11 focus:border-primary focus:outline-none"
+                  />
+                </div>
+              </label>
+
+              {/* Phone */}
+              <label className="block">
+                <span className="mb-2 block text-sm font-semibold">
+                  Phone
+                </span>
+
+                <div className="relative">
+                  <IoCallOutline className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg text-base-content/40" />
+
+                  <input
+                    type="tel"
+                    name="mobileNumber"
+                    value={profileForm.mobileNumber}
+                    onChange={handleChange}
+                    placeholder="10 digit mobile number"
+                    className="input input-bordered h-12 w-full pl-11 focus:border-primary focus:outline-none"
+                  />
+                </div>
+              </label>
+
+              {/* About */}
+              <label className="block">
+                <span className="mb-2 block text-sm font-semibold">
+                  About
+                </span>
+
+                <div className="relative">
+                  <IoInformationCircleOutline className="pointer-events-none absolute left-4 top-4 text-lg text-base-content/40" />
+
+                  <textarea
+                    name="about"
+                    value={profileForm.about}
+                    onChange={handleChange}
+                    placeholder="Tell something about yourself..."
+                    rows={4}
+                    maxLength={150}
+                    className="textarea textarea-bordered min-h-28 w-full resize-none pl-11 focus:border-primary focus:outline-none"
+                  />
+                </div>
+
+                <p className="mt-1 text-right text-xs text-base-content/40">
+                  {profileForm.about.length}/150
+                </p>
+              </label>
+
+              {/* Buttons */}
+              <div className="flex gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  disabled={isSaving}
+                  className="btn btn-outline h-12 flex-1 rounded-xl"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="btn btn-primary h-12 flex-1 rounded-xl"
+                >
+                  {isSaving ? (
+                    <>
+                      <span className="loading loading-spinner loading-sm" />
+                      Saving
+                    </>
+                  ) : (
+                    <>
+                      <IoCheckmarkCircle className="text-lg" />
+                      Save
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </section>
+        ) : (
+          <>
+            {/* =============================================
+                ABOUT
+            ============================================= */}
+            <section className="mt-4 overflow-hidden rounded-2xl bg-base-100 shadow-sm">
+              <div className="border-b border-base-300 px-5 py-4">
+                <h2 className="text-sm font-semibold text-base-content/55">
+                  About
                 </h2>
               </div>
 
-              <div className="space-y-3">
+              <div className="px-5 py-5">
+                <p className="text-sm leading-6 text-base-content/80">
+                  {userAbout}
+                </p>
+              </div>
+            </section>
 
+            {/* =============================================
+                CONTACT INFORMATION
+            ============================================= */}
+            <section className="mt-4 overflow-hidden rounded-2xl bg-base-100 shadow-sm">
+              <div className="border-b border-base-300 px-5 py-4">
+                <h2 className="text-sm font-semibold text-base-content/55">
+                  Contact info
+                </h2>
+              </div>
+
+              <div className="divide-y divide-base-300">
                 {/* Email */}
-                <div className="flex items-center gap-4 rounded-field bg-base-200 p-4">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-field bg-primary/10 text-primary">
-                    <MdMail className="text-xl" />
+                <div className="flex items-center gap-4 px-5 py-4">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <IoMailOutline className="text-xl" />
                   </div>
 
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold uppercase text-base-content/50">
+                    <p className="text-xs text-base-content/45">
                       Email
                     </p>
 
-                    <p className="truncate font-medium">
+                    <p className="mt-1 truncate text-sm font-medium">
                       {userEmail}
                     </p>
                   </div>
                 </div>
 
                 {/* Phone */}
-                <div className="flex items-center gap-4 rounded-field bg-base-200 p-4">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-field bg-primary/10 text-primary">
-                    <MdPhone className="text-xl" />
+                <div className="flex items-center gap-4 px-5 py-4">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <IoCallOutline className="text-xl" />
                   </div>
 
-                  <div>
-                    <p className="text-xs font-semibold uppercase text-base-content/50">
+                  <div className="min-w-0">
+                    <p className="text-xs text-base-content/45">
                       Phone
                     </p>
 
-                    <p className="font-medium">
+                    <p className="mt-1 text-sm font-medium">
                       {userPhone}
                     </p>
                   </div>
                 </div>
-
-                {/* About */}
-                <div className="rounded-field bg-base-200 p-4">
-                  <p className="text-xs font-semibold uppercase text-base-content/50">
-                    About
-                  </p>
-
-                  <p className="mt-2 leading-relaxed text-base-content/80">
-                    {userAbout}
-                  </p>
-                </div>
               </div>
             </section>
 
-            {/* Edit Profile */}
-            <section>
-              <div className="mb-4">
-                <h2 className="font-display text-xl font-semibold">
-                  {isEditing ? "Edit profile" : "Your account"}
+            {/* =============================================
+                ACCOUNT
+            ============================================= */}
+            <section className="mt-4 overflow-hidden rounded-2xl bg-base-100 shadow-sm">
+              <div className="border-b border-base-300 px-5 py-4">
+                <h2 className="text-sm font-semibold text-base-content/55">
+                  Account
                 </h2>
               </div>
 
-              {!isEditing ? (
-                <div className="rounded-field border border-base-300 bg-base-200 p-5">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-field bg-primary text-primary-content">
-                      <MdPerson className="text-2xl" />
-                    </div>
-
-                    <div>
-                      <h3 className="font-bold">
-                        Keep your profile updated
-                      </h3>
-
-                      <p className="mt-1 text-sm leading-6 text-base-content/65">
-                        Add your name, contact details, and a short bio so
-                        your friends can easily recognize you.
-                      </p>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="btn btn-primary mt-5 w-full rounded-field"
-                  >
-                    <MdEdit />
-                    Edit Profile
-                  </button>
+              <button
+                type="button"
+                onClick={() => setIsEditing(true)}
+                className="flex w-full items-center gap-4 px-5 py-4 text-left transition hover:bg-base-200"
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <IoPersonOutline className="text-xl" />
                 </div>
-              ) : (
-                <form
-                  onSubmit={handleSaveProfile}
-                  className="space-y-4"
-                >
 
-                  {/* Name */}
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-semibold">
-                      Full Name
-                    </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium">
+                    Edit profile
+                  </p>
 
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={profileForm.fullName}
-                      onChange={handleChange}
-                      placeholder="Your full name"
-                      className="input input-bordered w-full"
-                    />
-                  </label>
+                  <p className="mt-1 text-xs text-base-content/45">
+                    Change your name, phone and about
+                  </p>
+                </div>
 
-                  {/* Email */}
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-semibold">
-                      Email
-                    </span>
-
-                    <input
-                      type="email"
-                      name="email"
-                      value={profileForm.email}
-                      onChange={handleChange}
-                      placeholder="name@email.com"
-                      className="input input-bordered w-full"
-                    />
-                  </label>
-
-                  {/* Phone */}
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-semibold">
-                      Phone Number
-                    </span>
-
-                    <input
-                      type="tel"
-                      name="mobileNumber"
-                      value={profileForm.mobileNumber}
-                      onChange={handleChange}
-                      placeholder="10 digit mobile number"
-                      className="input input-bordered w-full"
-                    />
-                  </label>
-
-                  {/* About */}
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-semibold">
-                      About
-                    </span>
-
-                    <textarea
-                      name="about"
-                      value={profileForm.about}
-                      onChange={handleChange}
-                      placeholder="Tell something about yourself..."
-                      rows={4}
-                      className="textarea textarea-bordered w-full"
-                    />
-                  </label>
-
-                  <div className="flex gap-3 pt-2">
-                    <button
-                      type="button"
-                      onClick={handleReset}
-                      className="btn btn-outline flex-1 rounded-field"
-                    >
-                      Cancel
-                    </button>
-
-                    <button
-                      type="submit"
-                      disabled={isSaving}
-                      className="btn btn-primary flex-1 gap-2 rounded-field"
-                    >
-                      {isSaving ? (
-                        <span className="loading loading-spinner loading-sm" />
-                      ) : (
-                        <MdSave className="text-lg" />
-                      )}
-                      {isSaving ? "Saving..." : "Save Changes"}
-                    </button>
-                  </div>
-                </form>
-              )}
+                <IoChevronForward className="shrink-0 text-lg text-base-content/35" />
+              </button>
             </section>
-          </div>
-        </section>
-      </div>
-    </main>
+
+            {/* =============================================
+                LOGOUT
+            ============================================= */}
+            <section className="mt-4 overflow-hidden rounded-2xl bg-base-100 shadow-sm">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex w-full items-center gap-4 px-5 py-4 text-left text-error transition hover:bg-error/5"
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-error/10">
+                  <IoLogOutOutline className="text-xl" />
+                </div>
+
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">
+                    Log out
+                  </p>
+
+                  <p className="mt-1 text-xs text-base-content/45">
+                    Sign out from this device
+                  </p>
+                </div>
+
+                <IoChevronForward className="text-lg opacity-40" />
+              </button>
+            </section>
+          </>
+        )}
+
+        {/* Footer */}
+        <div className="px-4 py-8 text-center">
+          <p className="text-xs font-medium text-base-content/35">
+            DostiHUB
+          </p>
+
+          <p className="mt-1 text-[11px] text-base-content/25">
+            Connect. Chat. Stay close.
+          </p>
+        </div>
+      </main>
+    </div>
   );
 };
 

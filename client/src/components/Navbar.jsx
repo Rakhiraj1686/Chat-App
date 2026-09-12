@@ -1,51 +1,42 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, Moon, Sun, Laptop } from "lucide-react";
+import { Menu, X, Palette } from "lucide-react";
 import {
-  LIGHT_THEME,
-  DARK_THEME,
+  THEME_OPTIONS,
   getStoredThemePreference,
   setStoredThemePreference,
 } from "../config/theme";
 
-const THEME_OPTIONS = [
-  { value: LIGHT_THEME, label: "Light", icon: Sun },
-  { value: "system", label: "System", icon: Laptop },
-  { value: DARK_THEME, label: "Dark", icon: Moon },
-];
-
 const ThemeToggle = ({ preference, onChange, className = "" }) => (
-  <div
-    role="radiogroup"
-    aria-label="Theme"
-    className={`inline-flex items-center gap-0.5 rounded-field border border-base-300 bg-base-100 p-0.5 ${className}`}
+  <label
+    className={`select select-xs w-[105px] min-w-0 flex items-center gap-1.5 border-base-300 bg-base-100 px-2 ${className}`}
   >
-    {THEME_OPTIONS.map((option) => {
-      const active = preference === option.value;
-      return (
-        <button
-          key={option.value}
-          type="button"
-          role="radio"
-          aria-checked={active}
-          aria-label={option.label}
-          title={option.label}
-          onClick={() => onChange(option.value)}
-          className={`flex h-8 w-8 items-center justify-center rounded-[calc(var(--radius-field)-2px)] transition-colors ${
-            active
-              ? "bg-neutral text-neutral-content"
-              : "text-base-content/50 hover:bg-base-200 hover:text-base-content"
-          }`}
-        >
-          <option.icon size={15} strokeWidth={2.25} />
-        </button>
-      );
-    })}
-  </div>
+    <Palette
+      size={14}
+      className="shrink-0 text-base-content/60"
+    />
+
+    <select
+      aria-label="Theme"
+      value={preference}
+      onChange={(event) => onChange(event.target.value)}
+      className="w-full min-w-0 bg-transparent text-xs outline-none"
+    >
+      <option value="system">System</option>
+
+      {THEME_OPTIONS.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  </label>
 );
 
 const Navbar = () => {
-  const [themePreference, setThemePreference] = useState(() => getStoredThemePreference());
+  const [themePreference, setThemePreference] = useState(() =>
+    getStoredThemePreference(),
+  );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -58,7 +49,11 @@ const Navbar = () => {
     <header className="sticky top-0 z-50 border-b border-base-300 bg-base-100/90 backdrop-blur-lg">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-8">
         {/* ================= LOGO ================= */}
-        <Link to="/" aria-label="DostiHub home" className="group flex items-center gap-2.5">
+        <Link
+          to="/"
+          aria-label="DostiHub home"
+          className="group flex items-center gap-2.5"
+        >
           <span className="flex h-9 w-9 items-center justify-center rounded-field bg-neutral font-display text-lg font-semibold text-primary transition-transform duration-300 group-hover:-rotate-3">
             द
           </span>
@@ -69,7 +64,10 @@ const Navbar = () => {
 
         {/* ================= DESKTOP ACTIONS ================= */}
         <div className="hidden items-center gap-3 md:flex">
-          <ThemeToggle preference={themePreference} onChange={handleThemeChange} />
+          <ThemeToggle
+            preference={themePreference}
+            onChange={handleThemeChange}
+          />
 
           <span className="mx-1 h-5 w-px bg-base-300" />
 
@@ -110,7 +108,10 @@ const Navbar = () => {
               <span className="text-xs font-medium uppercase tracking-wide text-base-content/50">
                 Appearance
               </span>
-              <ThemeToggle preference={themePreference} onChange={handleThemeChange} />
+              <ThemeToggle
+                preference={themePreference}
+                onChange={handleThemeChange}
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-2 border-t border-base-300 pt-4">
